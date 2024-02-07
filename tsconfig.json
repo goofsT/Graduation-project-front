@@ -1,0 +1,46 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "skipLibCheck": true,
+    /* Bundler mode */
+    "moduleResolution": "node",
+    "allowImportingTsExtensions": true,// 允许导入.ts文件
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "preserve",// 保留jsx
+    /* Linting */
+    "strict": false,
+    "noUnusedLocals": false,// 不允许未使用的局部变量
+    "noUnusedParameters": false,// 允许未使用的参数
+    "noFallthroughCasesInSwitch": true,// switch必须有default
+    "importsNotUsedAsValues": "remove",// 保留import
+     "preserveValueImports":false,// 保留import
+    "noImplicitAny": false,// 不允许隐式的any类型
+    "baseUrl": "./", // 解析非相对模块的基地址，默认是当前目录
+    "paths": { //路径映射，相对于baseUrl
+      "@/*": [
+        "src/*"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "src/*.vue"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
+}

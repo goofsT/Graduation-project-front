@@ -1,0 +1,116 @@
+<template>
+  <div class="container">
+    <el-menu  default-active="1-1" class="class-menu" mode="horizontal" background-color="#545c64" text-color="#fff" active-text-color="#0c8fe9" @select="handleSelect">
+      <el-sub-menu v-for="item in classNavList" :key="item.id" :index="item.id">
+        <template #title>{{item.name}}</template>
+        <el-menu-item v-for="cl in item.children" :key="cl.id" :index="cl.id">{{cl.name}}</el-menu-item>
+      </el-sub-menu>
+    </el-menu>
+
+    <el-card class="class-card" v-for="item in classInfo">
+      <template #header>
+        <div class="card-header">
+          <div>{{item.name}}</div>
+          <div :style="{
+            color:getColor(item.status),
+          }">{{item.status}}</div>
+        </div>
+      </template>
+        <div class="card-body">
+          <div>教师：{{item.teacher || '暂无'}}</div>
+          <div>课程：{{item.course || '暂无'}}</div>
+          <div>时间段:{{item.time || '暂无'}}</div>
+        </div>
+    </el-card>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { reactive, ref } from "vue";
+//导航选项
+const classNavList = reactive([
+  {
+    id: "1",
+    name: "1号楼",
+    children: [
+      { id: "1-1", name: "一楼教室" },
+      { id: "1-2", name: "二楼教室" },
+      { id: "1-3", name: "三楼教室" },
+    ],
+  },
+  {
+    id: "2",
+    name: "2号楼",
+    children: [
+      { id: "2-1", name: "一楼教室" },
+      { id: "2-2", name: "二楼教室" },
+      { id: "2-3", name: "三楼教室" },
+    ],
+  },
+]);
+
+const classInfo=reactive([
+  {name:'1号楼一楼教室(1-1)',status:'上课中',teacher:'王一川',course:'数字逻辑',time:'08:00 - 09:40'},
+  {name:'1号楼一楼教室(1-2)',status:'上课中',teacher:'张无',course:'大学英语',time:'08:00 - 09:40'},
+  {name:'1号楼一楼教室(1-3)',status:'空闲中',teacher:'',course:'',time:''},
+  {name:'1号楼一楼教室(1-4)',status:'维修',teacher:'',course:'',time:''},
+])
+
+const handleSelect = (key: string, keyPath: string[]) => {
+  console.log(key, keyPath);
+};
+
+const getColor=(status:string)=>{
+  if(status==='上课中'){
+    return '#0c8fe9'
+  }else if(status==='空闲中'){
+    return '#52a84f'
+  }else{
+    return '#ff0000'
+  }
+}
+
+
+</script>
+
+<style scoped lang="scss">
+.container {
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  .class-menu {
+    background-color: #001829;
+    border-bottom: 1px solid #09a2f3;
+    .el-sub-menu {
+      border-radius: 5px 5px 0 0 ;
+      border:1px solid #1d4952;
+      overflow: hidden;
+      transition: all .3s ;
+    }
+    .is-active {
+      border-radius: 5px 5px 0 0 ;
+      border:1px solid #09a2f3;
+      background-color: #193d50;
+    }
+  }
+  .class-card {
+    margin: 10px 0;
+    background-color: #092337;
+    box-shadow: 0 0 2px 1px #fff;
+    .card-header{
+      color: #188ddc;
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+    }
+    .card-body{
+      color:#fff;
+    }
+    &:hover{
+      border:1px solid #105df1;
+      background-color: #3a4d64;
+      box-shadow: 0 0 5px 5px #fff;
+    }
+  }
+}
+</style>
