@@ -64,7 +64,6 @@ const getWeatherInfo=async ()=>{
    if(weatherRes.code==200){
      weatherInfo.value=weatherRes.data[0]
      useWeatherStore().setWeather(weatherInfo.value)
-     console.log(weatherInfo.value);
    }else{
      ElMessage.warning('获取天气信息失败');
    }
