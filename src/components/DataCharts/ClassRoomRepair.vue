@@ -1,10 +1,10 @@
 <template>
   <div class="scroll-container">
-    <div class="scroll-title">设备维修数据</div>
+    <div class="scroll-title">不可用教室</div>
     <el-scrollbar v-if="repairData.length>0" height="100%">
       <div class="device-item scrollbar-demo-item" v-for="item in repairData" :key="item" >
-        <div class="device-item-name">{{ item.deviceName +'损坏' }}</div>
-        <div class="device-item-status">待维修</div>
+        <div class="device-item-name">{{ item.roomName }}</div>
+        <div class="device-item-status">暂时无法使用</div>
       </div>
     </el-scrollbar>
     <div v-else style="height:100%">
@@ -14,20 +14,31 @@
 </template>
 
 <script setup lang="ts">
-import { getRepairDevice } from "@/api/device.ts";
+import { onBeforeUnmount, ref } from "vue";
+import { getRepairClassRoom } from "@/api/ClassRoom.ts";
 import { reactive, onMounted } from 'vue'
 import { ElMessage } from "element-plus";
 const repairData = reactive([])
+const timer = ref<any>(null)
 onMounted(()=>{
   getData()
+  setInterval(()=>{getData()},60000)
+})
+onBeforeUnmount(()=>{
+  timer.value && clearInterval(timer.value)
 })
 
 const getData = async () => {
-  const res = await getRepairDevice()
+  const res = await getRepairClassRoom()
   if (res.code === 200) {
-    Object.assign(repairData, res.data)
+    if(res.data.length===0){
+      repairData.length = 0
+      Object.keys(repairData).forEach(key => delete repairData[key]);
+      return
+    }
+    Object.assign(repairData, res.data);
   }else{
-    ElMessage.warning('维修设备数据获取失败');
+    ElMessage.warning('维修教室数据获取失败');
   }
 }
 
@@ -61,7 +72,7 @@ const getData = async () => {
 
     }
     .device-item-status{
-      color: #f00;
+      color: #0ba8ec;
     }
 
   }

@@ -10,23 +10,25 @@
     <el-card class="class-card" v-for="item in classInfo">
       <template #header>
         <div class="card-header">
-          <div>{{item.name}}</div>
+          <div>{{item.roomName}}</div>
           <div :style="{
             color:getColor(item.status),
-          }">{{item.status}}</div>
+          }">{{getStatusText(item.status)}}</div>
         </div>
       </template>
-        <div class="card-body">
-          <div>教师：{{item.teacher || '暂无'}}</div>
-          <div>课程：{{item.course || '暂无'}}</div>
-          <div>时间段:{{item.time || '暂无'}}</div>
+        <div class="card-body" v-if="item.course">
+          <div>教师：{{item.course.teacher.teacherName || '暂无'}}</div>
+          <div>课程：{{item.course.courseName || '暂无'}}</div>
+          <div>时间段:{{item.course.courseTimeStart.slice(11,16)+ '-'+item.course.courseTimeEnd.slice(11,16)|| '暂无'}}</div>
         </div>
     </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from "vue";
+import { onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
+import {getClassRoomByFloor} from '@/api/ClassRoom.ts'
+import { ElMessage } from "element-plus";
 //导航选项
 const classNavList = reactive([
   {
@@ -48,28 +50,67 @@ const classNavList = reactive([
     ],
   },
 ]);
+const classInfo=reactive([])
+const timer=ref<any>(null)
+//监听楼层变化
+const activeBuilding = ref("1");
+const activeFloor = ref("1");
 
-const classInfo=reactive([
-  {name:'1号楼一楼教室(1-1)',status:'上课中',teacher:'王一川',course:'数字逻辑',time:'08:00 - 09:40'},
-  {name:'1号楼一楼教室(1-2)',status:'上课中',teacher:'张无',course:'大学英语',time:'08:00 - 09:40'},
-  {name:'1号楼一楼教室(1-3)',status:'空闲中',teacher:'',course:'',time:''},
-  {name:'1号楼一楼教室(1-4)',status:'维修',teacher:'',course:'',time:''},
-])
+
+onMounted(()=>{
+  //监听楼层选择变化
+  watch([activeBuilding, activeFloor], (newVal, oldVal) => {
+    getFloorClass(newVal[0],newVal[1])
+  }, { immediate: true });
+  //定时刷新
+  timer.value=setInterval(()=>{
+    getFloorClass(activeBuilding.value,activeFloor.value)
+  },60000)
+})
+
+onBeforeUnmount(()=>{
+  timer.value && clearInterval(timer.value)
+})
+
 
 const handleSelect = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath);
+  activeBuilding.value = key.slice(0, 1);
+  activeFloor.value = key.slice(2);
 };
 
+const getFloorClass=async (building:string,floor:string)=>{
+  try{
+    const res=await getClassRoomByFloor(building,floor)
+    if(res.code===200){
+      Object.assign(classInfo,res.data)
+    }else{
+      ElMessage.warning("获取教室信息失败！")
+    }
+  }catch (e) {
+    ElMessage.error("服务器出错了！")
+  }
+}
+
+
 const getColor=(status:string)=>{
-  if(status==='上课中'){
+  if(status==='1'){
     return '#0c8fe9'
-  }else if(status==='空闲中'){
+  }else if(status==='0'){
     return '#52a84f'
   }else{
     return '#ff0000'
   }
 }
 
+const getStatusText=(status:string)=>{
+  if(status==='0'){
+    return '空闲'
+  }else if(status==='1'){
+    return '使用中'
+  }else{
+    return '暂停使用'
+  }
+}
 
 </script>
 

@@ -4,11 +4,12 @@
     <ChartScatter class="chart2" />
   </CommonBox>
   <CommonBox title="设备数据" :height="620" :display="showDeviceData" @displayChange="changeDisplay">
-    <DeviceBar class="chart1" />
+    <DeviceBar class="chart1"/>
     <DeviceRepairBar class="chart1" />
   </CommonBox>
-  <CommonBox title="教室数据" :height="300" :display="showClassData" @displayChange="changeDisplay">
-    <ChartBar class="chart1" />
+  <CommonBox title="教室数据" :height="600" :display="showClassData" @displayChange="changeDisplay">
+    <ClassRoomBar class="chart1" style="height:150px"  />
+    <ClassRoomRepair class="chart1" />
   </CommonBox>
 </template>
 
@@ -19,6 +20,8 @@ import ChartBar from "@/components/DataCharts/ChartBar.vue";
 import ChartScatter from "@/components/DataCharts/ChartScatter.vue";
 import DeviceBar from "@/components/DataCharts/DeviceBar.vue";
 import DeviceRepairBar from "@/components/DataCharts/DeviceRepairBar.vue";
+import ClassRoomBar from "@/components/DataCharts/ClassRoomBar.vue";
+import ClassRoomRepair from "@/components/DataCharts/ClassRoomRepair.vue";
 
 const showPersonData=ref(true)
 const showDeviceData=ref(false)
