@@ -26,7 +26,7 @@ export const useDeviceStore = defineStore({
        }
       }
     },
-    async updateDeviceInfo(data) {
+    async updateDeviceInfo() {
       const res=await getAllDevice()
       this.device=res.data;
       localStorage.setItem('deviceInfo', JSON.stringify(res.data));

@@ -7,7 +7,7 @@
         <div class="device-item-status">待维修</div>
       </div>
     </el-scrollbar>
-    <div v-else style="height:100%">
+    <div v-else style="height:80%">
       <el-empty description="暂无数据" />
     </div>
   </div>
@@ -15,19 +15,33 @@
 
 <script setup lang="ts">
 import { getRepairDevice } from "@/api/device.ts";
-import { reactive, onMounted } from 'vue'
+import { reactive, onMounted, onBeforeUnmount, ref } from "vue";
 import { ElMessage } from "element-plus";
 const repairData = reactive([])
+const timer = ref<any>(null)
 onMounted(()=>{
   getData()
+  timer.value=setInterval(()=>{getData()},1000)
+})
+onBeforeUnmount(()=>{
+  timer.value && clearInterval(timer.value)
 })
 
 const getData = async () => {
-  const res = await getRepairDevice()
-  if (res.code === 200) {
-    Object.assign(repairData, res.data)
-  }else{
-    ElMessage.warning('维修设备数据获取失败');
+  try{
+    const res = await getRepairDevice()
+    if (res.code === 200) {
+      if(res.data.length===0){
+        repairData.length = 0
+        Object.keys(repairData).forEach(key => delete repairData[key]);
+        return
+      }
+      Object.assign(repairData, res.data);
+    }else{
+      ElMessage.warning('维修设备数据获取失败');
+    }
+  }catch (e) {
+    ElMessage.warning('服务器错误');
   }
 }
 

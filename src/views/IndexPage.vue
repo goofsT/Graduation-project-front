@@ -6,14 +6,16 @@
     <div class="content">
       <div class="left">
         <el-tabs style="background-color:#001525;height:108%;border:1px solid #0c8ee8;" stretch v-model="activeName" type="border-card" @tab-click="handleTabClick">
-          <el-tab-pane label="实时数据" name="first">
-            <template #label><span class="custom-tabs-label"><i class="iconfont icon-chakan2"></i><span>实时数据</span></span></template>
+          <el-tab-pane label="数据总览" name="first">
+            <template #label><span class="custom-tabs-label"><i class="iconfont icon-chakan2"></i><span>数据总览</span></span></template>
             <LiveData />
           </el-tab-pane>
-          <el-tab-pane label="设备管理" name="second"><template #label><span class="custom-tabs-label"><i class="iconfont icon-icon-shezhi"></i><span>设备管理</span></span></template>
+          <el-tab-pane label="设备状态" name="second">
+            <template #label><span class="custom-tabs-label"><i class="iconfont icon-icon-shezhi"></i><span>设备状态</span></span></template>
+            <DeviceStatus/>
           </el-tab-pane>
-          <el-tab-pane label="人员管理" name="third">
-            <template #label><span class="custom-tabs-label"><i class="iconfont icon-icon-yonghu"></i><span>人员管理</span></span></template>
+          <el-tab-pane label="实时事务" name="third">
+            <template #label><span class="custom-tabs-label"><i class="iconfont icon-icon-yonghu"></i><span>实时事务</span></span></template>
           </el-tab-pane>
           <el-tab-pane label="实时教室" name="fourth">
             <template #label><span class="custom-tabs-label"><i class="iconfont icon-kongjiaoshichaxun-01"></i><span>实时教室</span></span></template>
@@ -40,6 +42,7 @@ import LiveAffairs from "@/components/home/LiveAffairs.vue";
 import HomeHeader from "@/components/home/HomeHeader.vue";
 import LiveData from "@/components/home/LiveData.vue";
 import ClassManager from "@/components/home/ClassManager.vue";
+import DeviceStatus from "@/components/home/DeviceStatus.vue";
 const activeName = ref("first");
 const handleTabClick = () => {};
 
