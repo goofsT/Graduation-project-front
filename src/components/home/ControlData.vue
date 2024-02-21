@@ -12,13 +12,20 @@
         <span :class="item.icon"></span>
       </div>
     </div>
+    <div class="scene_control">
+      <div :style="{background:showWeather?'#27a0f3':'#567988'}" @click="changeStatus('weather')">场景天气</div>
+      <div :style="{background:showDevice?'#27a0f3':'#567988'}" @click="changeStatus('device')">维修设备</div>
+      <div :style="{background:showAffairs?'#27a0f3':'#567988'}" @click="changeStatus('affair')">事务提醒</div>
+    </div>
+
   </div>
 </template>
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
+import { useDeviceStore } from "@/store/deviceStore.ts";
 const data = reactive([
   {
-    title: '接入视频单位数',
+    title: '设备接入数量',
     num: '265/800',
     sate: '目标',
     rate: '设备完好率',
@@ -26,10 +33,10 @@ const data = reactive([
     icon: 'iconfont icon-icon-chakan',
   },
   {
-    title: '人员出入比例',
+    title: '教室使用',
     num: '265/800',
     sate: '当前',
-    rate: '出/入',
+    rate: '使用率',
     rateNum: '0.88',
     icon: 'iconfont icon-icon-dengjilikai',
   },
@@ -42,6 +49,17 @@ const data = reactive([
     icon: 'iconfont icon-icon-shenhe',
   },
 ])
+
+const showWeather=ref(false)
+const showDevice=ref(false)
+const showAffairs=ref(false)
+
+
+const changeStatus=(type)=>{
+  type==='weather' && (showWeather.value=!showWeather.value)
+  type==='device' && (showDevice.value=!showDevice.value)
+  type==='affair' && (showAffairs.value=!showAffairs.value)
+}
 </script>
 <style scoped lang="scss">
 .container {
@@ -58,6 +76,25 @@ const data = reactive([
   transform: translateX(-50%);
   background-color: transparent!important;
   opacity: 0.8;
+  .scene_control{
+    position: absolute;
+    left:-190px;
+    top:-10px;
+    border: 4px solid #0c8fe9;
+    border-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.7);
+    div{
+      margin: 10px 0;
+      padding: 5px 10px;
+      background-color: #567988;
+      border: 1px solid #0c8fe9;
+      &:hover{
+        cursor: pointer;
+        font-weight: bold;
+        background-color: #27a0f3;
+      }
+    }
+  }
   .data-item {
     margin-top: 0px;
     width: 20%;

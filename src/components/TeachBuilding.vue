@@ -9,17 +9,21 @@ import {OrbitControls} from "three/addons/controls/OrbitControls";
 import {DRACOLoader} from "three/addons/loaders/DRACOLoader";
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader";
 import {mergeGeometries} from "three/examples/jsm/utils/BufferGeometryUtils";
+import { useWeatherStore } from "@/store/weatherStore.ts";
 import { PointLightHelper } from "three";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { SSRPass } from 'three/examples/jsm/postprocessing/SSRPass.js';
+import { getWeather } from "@/api/weather.ts";
+import { ElMessage } from "element-plus";
 //添加坐标轴辅助
 export default {
   name: 'TeachBuilding',
   data(){
     return{
+      control:null,//轨道控制器
       renderId:null,
       raycaster:null,
       mouse:null,
@@ -37,6 +41,7 @@ export default {
       leftBuildingDoor:[],
       rightBuildingDoor:[],//顶楼/一楼教学楼门
       rayCasterMeshes:[],//射线检测的mesh
+      showWeather:true//是否显示天气
     }
   },
   mounted() {
@@ -85,7 +90,7 @@ export default {
 
       //添加环境光
       this.ambientLight = new THREE.AmbientLight(0xffffff, 0.6)
-     this.scene.add(this.ambientLight)
+      this.scene.add(this.ambientLight)
       //添加平行光
       this.sunLight = new THREE.DirectionalLight(0xffffff, 3);
       this.sunLight.position.set(20, 20, 20)
@@ -135,6 +140,7 @@ export default {
       this.control.minPolarAngle = Math.PI / 8
 
 
+
       // 监听尺寸变化
       window.addEventListener('resize', () => {
         this.getContainerInfo()
@@ -147,13 +153,37 @@ export default {
         //更新渲染器像素比
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
       })
+      this.initSceneWeather()
+      setTimeout(()=>{
+        this.showWeather=false
+        setTimeout(()=>{
+          this.showWeather=true
+        },5000)
+      },5000)
       this.render()
     },
     render(){
       this.control.update()
+      this.renderWeather()
       // this.composer.render()//使用效果合成器渲染
       this.renderer.render(this.scene, this.camera)
       this.renderId = requestAnimationFrame(this.render)
+    },
+    renderWeather(){
+      if(this.showWeather && this.weatherParticles){
+        //判断场景中是否有雪花
+        this.scene.add(this.weatherParticles)
+        for(let i=1;i<this.weatherVertices.length;i+=3){
+          if(this.weatherVertices[i]<-10){
+            this.weatherVertices[i]=10
+          }
+          this.weatherVertices[i]-=Math.random()*0.2
+        }
+        //重新设置位置属性
+        this.weatherGeometry.setAttribute('position',new THREE.Float32BufferAttribute(this.weatherVertices,3))
+      }else{
+        this.weatherParticles && this.scene.remove(this.weatherParticles)
+      }
     },
     initModel(){
       const dracoLoader = new DRACOLoader()
@@ -299,6 +329,71 @@ export default {
         }
       })
     },
+
+
+   async initSceneWeather(){
+      let weather=null
+      if(localStorage.getItem('weather')){
+        weather=JSON.parse(localStorage.getItem('weather'))
+        this.setWeather(weather)
+      }else{
+        try{
+          const res=await getWeather()
+          const weatherRes=await getWeather()
+          if(res.code==200){
+            weather=weatherRes.data[0]
+            localStorage.setItem('weather',JSON.stringify(weather))
+            this.setWeather(weather)
+          }else{
+            ElMessage.warning('获取天气信息失败');
+          }
+        }catch (e) {
+          ElMessage.warning('服务器出错了')
+        }
+      }
+    },
+    setWeather(weather){
+      this.weatherTexture=new THREE.TextureLoader().load(this.getWeatherTextureUrl(weather))
+      this.weatherGeometry = new THREE.BufferGeometry()
+      this.weatherVertices = []
+      for(let i=0;i<500;i++){
+        const x=Math.random()*20-10
+        const y=Math.random()*20-10
+        const z=Math.random()*20-10
+        this.weatherVertices.push(x,y,z)
+      }
+      this.weatherGeometry.setAttribute('position',new THREE.Float32BufferAttribute(this.weatherVertices,3))
+      //创建材质
+      this.snowMaterial=new THREE.PointsMaterial({
+        size:1,//大小
+        transparent:true,//允许透明
+        alphaTest:0.5,//如果不透明度低于此值，则不会渲染材质。默认值为0。
+        alphaMap:this.weatherTexture,//一张灰度纹理，用于控制整个表面的不透明度。（黑色：完全透明；白色：完全不透明）
+        map:this.weatherTexture,//纹理贴图
+      })
+      this.weatherParticles=new THREE.Points(this.weatherGeometry,this.snowMaterial)
+      this.scene.add(this.weatherParticles)
+    },
+    getWeatherTextureUrl(weather){
+      if(weather.type.includes('雪')) {
+        return './textures/snowflake2.png'
+      }else if(weather.type.includes('雨')){
+        return './textures/rain1.png'
+      }else{
+        return ''
+      }
+    },
+    disposeWeather(){
+      this.weatherTexture && this.weatherTexture.dispose()
+      this.weatherGeometry && this.weatherGeometry.dispose()
+      this.snowMaterial && this.snowMaterial.dispose()
+      if(this.weatherParticles){
+        this.weatherParticles.geometry.dispose()
+        this.weatherParticles.material.dispose()
+        this.scene.remove(this.weatherParticles)
+      }
+    }
+
   },
 
 }
