@@ -1,16 +1,28 @@
 <template>
   <div class="tea-building">
-    <ControlData />
+    <ControlData @controlChange="handleChange" />
     <div class="canvas-container">
-      <TeachBuilding />
+      <TeachBuilding
+        ref="teachBuilding"
+        :controlObj="controlObj"
+      />
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import ControlData from "@/components/home/ControlData.vue";
 import TeachBuilding from "@/components/TeachBuilding.vue";
-import LiveAffairs from "@/components/home/LiveAffairs.vue";
+import { ref } from "vue";
+const controlObj=ref({
+  showWeather:false,
+  showDevice:false,
+  showAffairs:false
+})
 
+
+const handleChange=(obj:any)=>{
+  controlObj.value=obj
+}
 </script>
 <style scoped lang="scss">
 .tea-building{

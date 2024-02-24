@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 4285842 */
-  src: url('iconfont.woff2?t=1702451670674') format('woff2'),
-       url('iconfont.woff?t=1702451670674') format('woff'),
-       url('iconfont.ttf?t=1702451670674') format('truetype');
+  src: url('iconfont.woff2?t=1708769218234') format('woff2'),
+       url('iconfont.woff?t=1708769218234') format('woff'),
+       url('iconfont.ttf?t=1708769218234') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,50 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-light_close:before {
+  content: "\e667";
+}
+
+.icon-door_open:before {
+  content: "\e650";
+}
+
+.icon-door_repair-copy:before {
+  content: "\e91e";
+}
+
+.icon-biaoge:before {
+  content: "\e64c";
+}
+
+.icon-door_close:before {
+  content: "\e64d";
+}
+
+.icon-fire_warning:before {
+  content: "\e64e";
+}
+
+.icon-light_open:before {
+  content: "\e6b8";
+}
+
+.icon-fire_normal:before {
+  content: "\e91c";
+}
+
+.icon-light_repair-copy:before {
+  content: "\e91d";
+}
+
+.icon-paiming:before {
+  content: "\e64a";
+}
+
+.icon-paimingbiaoqian:before {
+  content: "\e77e";
 }
 
 .icon-zhuyi:before {

@@ -6,6 +6,83 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "12754636",
+      "name": "light_close",
+      "font_class": "light_close",
+      "unicode": "e667",
+      "unicode_decimal": 58983
+    },
+    {
+      "icon_id": "14915250",
+      "name": "door_open",
+      "font_class": "door_open",
+      "unicode": "e650",
+      "unicode_decimal": 58960
+    },
+    {
+      "icon_id": "39329537",
+      "name": "door_repair",
+      "font_class": "door_repair-copy",
+      "unicode": "e91e",
+      "unicode_decimal": 59678
+    },
+    {
+      "icon_id": "1305461",
+      "name": "表格",
+      "font_class": "biaoge",
+      "unicode": "e64c",
+      "unicode_decimal": 58956
+    },
+    {
+      "icon_id": "1327253",
+      "name": "door_close",
+      "font_class": "door_close",
+      "unicode": "e64d",
+      "unicode_decimal": 58957
+    },
+    {
+      "icon_id": "13409682",
+      "name": "fire_warning",
+      "font_class": "fire_warning",
+      "unicode": "e64e",
+      "unicode_decimal": 58958
+    },
+    {
+      "icon_id": "33889529",
+      "name": "light_open",
+      "font_class": "light_open",
+      "unicode": "e6b8",
+      "unicode_decimal": 59064
+    },
+    {
+      "icon_id": "39329181",
+      "name": "fire_normal",
+      "font_class": "fire_normal",
+      "unicode": "e91c",
+      "unicode_decimal": 59676
+    },
+    {
+      "icon_id": "39329536",
+      "name": "light_repair",
+      "font_class": "light_repair-copy",
+      "unicode": "e91d",
+      "unicode_decimal": 59677
+    },
+    {
+      "icon_id": "10225196",
+      "name": "排名",
+      "font_class": "paiming",
+      "unicode": "e64a",
+      "unicode_decimal": 58954
+    },
+    {
+      "icon_id": "688084",
+      "name": "排名 标签",
+      "font_class": "paimingbiaoqian",
+      "unicode": "e77e",
+      "unicode_decimal": 59262
+    },
+    {
       "icon_id": "679804",
       "name": "注意",
       "font_class": "zhuyi",

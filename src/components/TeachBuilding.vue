@@ -1,26 +1,41 @@
 <template>
-  <div class="gl-container" ref="container"></div>
+  <div class="gl-container" ref="container">
+    <div id="card" class="card"></div>
+  </div>
 </template>
 <script lang="ts">
 import * as THREE from 'three'
-//导入hdr图库
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader'
 import {OrbitControls} from "three/addons/controls/OrbitControls";
 import {DRACOLoader} from "three/addons/loaders/DRACOLoader";
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader";
 import {mergeGeometries} from "three/examples/jsm/utils/BufferGeometryUtils";
-import { useWeatherStore } from "@/store/weatherStore.ts";
+import { CSS3DRenderer, CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import { PointLightHelper } from "three";
-import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { SSRPass } from 'three/examples/jsm/postprocessing/SSRPass.js';
+import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
 import { getWeather } from "@/api/weather.ts";
 import { ElMessage } from "element-plus";
+import { getRepairDevice } from "@/api/device.ts";
+import { GammaCorrectionShader } from "three/examples/jsm/shaders/GammaCorrectionShader";
+import { SMAAPass } from "three/examples/jsm/postprocessing/SMAAPass";
 //添加坐标轴辅助
 export default {
   name: 'TeachBuilding',
+  props: {
+    controlObj: {
+      type: Object,
+      default: () => {
+        return {
+          showWeather: false,
+          showDevice: false,
+          showAffairs: false
+        }
+      }
+    }
+  },
   data(){
     return{
       control:null,//轨道控制器
@@ -32,25 +47,40 @@ export default {
       ambientLight:null,//环境光
       containerHeight:null,
       containerWidth:null,
+      cardHeight:null,//卡片高度
+      cardWidth:null,// 卡片宽度
+      lights:[],//所有灯光
       corridorLightLeft:[],
       corridorLightRight:[],//走廊灯
       leftClassLight:[],
       rightClassLight:[],//教室灯
+      doors:[],//所有门
       classDoorRight:[],
       classDoorLeft:[],//教室门
       leftBuildingDoor:[],
       rightBuildingDoor:[],//顶楼/一楼教学楼门
+      fireHydrant:[],//消防栓
       rayCasterMeshes:[],//射线检测的mesh
-      showWeather:true//是否显示天气
+      showWeather:false,//是否显示天气
+      cardGroup:null,//卡片group
+      iconGroup:null,//图标group
+    }
+  },
+  watch:{
+    controlObj:{
+      handler(val){
+        this.showWeather=val.showWeather
+      },
+      deep:true
     }
   },
   mounted() {
     this.getContainerInfo()
     this.initSeen()
-    this.initModel()
   },
   beforeUnmount() {
     cancelAnimationFrame(this.renderId)
+    this.disposeWeather()
   },
   methods: {
     getContainerInfo(){
@@ -61,7 +91,10 @@ export default {
     },
     initSeen(){
       this.scene = new THREE.Scene()
-      //添加场景雾
+      this.cardGroup= new THREE.Group();
+      this.iconGroup=new THREE.Group();
+      this.scene.add(this.cardGroup)
+      this.scene.add(this.iconGroup)
       this.scene.fog=new THREE.Fog('#6c6969',0.015,500)
       //添加天空盒子纹理
       const skybox = new THREE.CubeTextureLoader()
@@ -71,7 +104,7 @@ export default {
       this.scene.environment = skybox
 
       this.camera = new THREE.PerspectiveCamera(45,this.containerWidth/this.containerHeight,0.1,200)
-      this.camera.position.set(15,5,0)
+      this.camera.position.set(18,8,0)
       this.camera.lookAt(0,0,0)
       this.camera.aspect = this.containerWidth/this.containerHeight
       this.camera.updateProjectionMatrix()
@@ -119,17 +152,6 @@ export default {
       this.renderer.setSize(this.containerWidth,this.containerHeight)
       this.$refs.container.appendChild(this.renderer.domElement)
 
-      //效果合成器
-      // this.composer = new EffectComposer(this.renderer)
-      // this.composer.addPass(new RenderPass(this.scene, this.camera))
-      // const ssrPass=new SSRPass({
-      //   renderer:this.renderer,
-      //   scene:this.scene,
-      //   camera:this.camera,
-      //   width:this.containerWidth,
-      //   height:this.containerHeight,
-      // })
-      // this.composer.addPass(ssrPass)
       //添加轨道控制器
       this.control = new OrbitControls(this.camera, this.renderer.domElement)
       // 设置控制器阻尼，让控制器更真实
@@ -138,8 +160,6 @@ export default {
       this.control.minDistance = 0
       this.control.maxPolarAngle = Math.PI/ 2
       this.control.minPolarAngle = Math.PI / 8
-
-
 
       // 监听尺寸变化
       window.addEventListener('resize', () => {
@@ -154,19 +174,106 @@ export default {
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
       })
       this.initSceneWeather()
-      setTimeout(()=>{
-        this.showWeather=false
-        setTimeout(()=>{
-          this.showWeather=true
-        },5000)
-      },5000)
+      this.initCss3DRender()
+      this.setBuildingName()
+      this.initOutLinePass()
+      this.initModel()
       this.render()
+    },
+    //初始化css3D渲染器
+    initCss3DRender(){
+      this.css3DRenderer = new CSS3DRenderer();
+      this.css3DRenderer.setSize(this.containerWidth, this.containerHeight);
+      document.getElementById('card')?.appendChild( this.css3DRenderer.domElement);
+    },
+    //高亮轮廓
+    initOutLinePass(){
+      //效果合成器
+      this.composer = new EffectComposer(this.renderer)
+      this.composer.addPass(new RenderPass(this.scene, this.camera))
+      const v2 = new THREE.Vector2(this.containerHeight, this.containerWidth);
+      this.outlinePass = new OutlinePass(v2, this.scene, this.camera);
+      this.outlinePass.visibleEdgeColor.set(0x00ffff);
+      this.outlinePass.edgeThickness = 4;
+      this.outlinePass.edgeStrength = 6;
+      this.outlinePass.renderToScreen = true
+      this.composer.addPass(this.outlinePass);
+      // 创建伽马校正通道
+      const gammaPass = new ShaderPass(GammaCorrectionShader);
+      this.composer.addPass(gammaPass);
+      const pixelRatio = this.renderer.getPixelRatio();
+      const smaaPass = new SMAAPass(this.containerWidth * pixelRatio, this.containerHeight * pixelRatio);
+      this.composer.addPass(smaaPass);
+    },
+    //设置建筑名称
+    setBuildingName(){
+      // 创建CSS3D对象
+      const element = document.createElement('div');
+      const element1 = document.createElement('div');
+      element.className='buildingName'
+      element1.className='buildingName'
+      element.innerHTML='1号教学楼'
+      element1.innerHTML='2号教学楼'
+      this.title = new CSS3DObject(element);
+      this.title1=new CSS3DObject(element1)
+      this.title.position.set(0, 5, 5);
+      this.title1.position.set(0, 5, -5);
+      this.scene.add(this.title);
+      this.scene.add(this.title1);
+    },
+    //设置卡片
+    setCard(position,name){
+      const card = document.createElement('div');
+      card.innerHTML=`
+       ${name}损坏
+      `
+      card.style.fontSize='3px'
+      card.style.color='#e51b6f'
+      card.style.width='30px'
+      card.style.height='8px'
+      card.style.pointerEvents='none'
+      card.style.background='url(images/card.png) no-repeat center center / 100% 100%'
+      this.card = new CSS3DObject(card);
+      //缩小卡片
+      this.card.scale.set(0.1,0.1,0.1)
+      this.card.position.set(position.x,position.y,position.z);
+      this.cardGroup.add(this.card)
+      this.scene.add(this.cardGroup);
+
+    },
+    //设置图标
+    setIcon(position,name,type){
+      const icon=document.createElement('div')
+      let iconClassName=''
+      if(type==='fire'){
+        iconClassName='icon-fire_warning'
+      }else if(type==='door'){
+        iconClassName='icon-door_repair-copy'
+      }
+      icon.innerHTML =`
+      <i class="iconfont ${iconClassName}" style="font-size: 4px;color:red"></i>
+      <div style="font-size: 2px;font-weight: normal;border-radius: 1px;background-color:rgba(14,14,14,0.7);">设备损坏</div>
+      `
+      this.icon = new CSS3DObject(icon);
+      this.icon.scale.set(0.1,0.1,0.1)
+      this.icon.position.set(position.x,position.y,position.z);
+      this.iconGroup.add(this.icon)
+      this.scene.add(this.iconGroup);
     },
     render(){
       this.control.update()
       this.renderWeather()
-      // this.composer.render()//使用效果合成器渲染
-      this.renderer.render(this.scene, this.camera)
+      this.composer.render()//使用效果合成器渲染
+      this.title.lookAt(this.camera.position)
+      this.title1.lookAt(this.camera.position)
+      this.cardGroup.children.forEach((card) => {
+        card.lookAt(this.camera.position);
+      });
+      this.iconGroup.children.forEach((icon) => {
+        icon.lookAt(this.camera.position);
+      });
+      //this.renderer.render(this.scene, this.camera)
+      this.css3DRenderer.render(this.scene, this.camera);
       this.renderId = requestAnimationFrame(this.render)
     },
     renderWeather(){
@@ -187,11 +294,11 @@ export default {
     },
     initModel(){
       const dracoLoader = new DRACOLoader()
-      dracoLoader.setDecoderPath('/draco/gltf/')
       const modelLoader = new GLTFLoader()
+      dracoLoader.setDecoderPath('/draco/gltf/')
       modelLoader.setDRACOLoader(dracoLoader)
       //加载模型
-      modelLoader.load('/model/tea.glb', (glb) => {
+      modelLoader.load('/model/教学楼1.glb', (glb) => {
         const model = glb.scene
         //遍历模型中的所有建筑
         this.scene.add(model)
@@ -203,9 +310,11 @@ export default {
               item.receiveShadow = true
             }else{
               if(item.name.includes('light')){
-                  this.saveLight(item)
+                this.saveLight(item)
               }else if(item.name.includes('door')){
                 this.saveDoor(item)
+              }else if(item.name.includes('fire')){
+                this.saveFireHydrant(item)
               }else{
                 item.castShadow = true
                 item.receiveShadow = true
@@ -221,7 +330,9 @@ export default {
         // console.log('左边教室门',this.classDoorLeft);
         // console.log('右边教室门',this.classDoorRight);
         // console.log('左大门',this.leftBuildingDoor);
-        console.log('右大门',this.rightBuildingDoor);
+        // console.log('右大门',this.rightBuildingDoor);
+        // console.log('消防栓',this.fireHydrant);
+        this.setRepairDeviceCard()
 
       })
     },
@@ -247,6 +358,30 @@ export default {
         this.classDoorLeft.push({name:mesh.name,mesh,light})
       }
     },
+    saveDoor(mesh){
+      if(mesh.name.includes('door')&&mesh.name.includes('right')) {
+        if(mesh.name.includes('class')){
+          this.classDoorRight.push({name:mesh.name,mesh})
+        }else{
+          this.rightBuildingDoor.push({name:mesh.name,mesh})
+        }
+        this.rayCasterMeshes.push(mesh)
+        this.doors.push({name:mesh.name,mesh})
+        return
+      }
+      if(mesh.name.includes('door')&&mesh.name.includes('left')) {
+        if(mesh.name.includes('class')){
+          this.classDoorLeft.push({name:mesh.name,mesh})
+        }else{
+          this.leftBuildingDoor.push({name:mesh.name,mesh})
+        }
+        this.rayCasterMeshes.push(mesh)
+        this.doors.push({name:mesh.name,mesh})
+      }
+    },
+    saveFireHydrant(mesh){
+      this.fireHydrant.push({name:mesh.name,mesh})
+    },
     createLight(position){
       const pointLight=new THREE.PointLight(0xffffff,0,6)
       pointLight.position.set(position.x,position.y-0.1,position.z)
@@ -254,25 +389,6 @@ export default {
       // this.scene.add(pointLightHelper);
       // this.scene.add(pointLight)
       return pointLight
-    },
-    saveDoor(mesh){
-        if(mesh.name.includes('door')&&mesh.name.includes('right')) {
-          if(mesh.name.includes('class')){
-            this.classDoorRight.push({name:mesh.name,mesh})
-          }else{
-            this.rightBuildingDoor.push({name:mesh.name,mesh})
-          }
-          this.rayCasterMeshes.push(mesh)
-          return
-        }
-        if(mesh.name.includes('door')&&mesh.name.includes('left')) {
-          if(mesh.name.includes('class')){
-            this.classDoorLeft.push({name:mesh.name,mesh})
-          }else{
-            this.leftBuildingDoor.push({name:mesh.name,mesh})
-          }
-          this.rayCasterMeshes.push(mesh)
-        }
     },
     //将group转换为mesh(合并几何体)
     handleGroupToMesh(group){
@@ -299,7 +415,6 @@ export default {
       mesh.name=name
       return mesh;
     },
-
     //射线检测
     handleRaycaster(){
       this.raycaster = new THREE.Raycaster()
@@ -313,8 +428,8 @@ export default {
         if (intersects.length > 0) {
           const obj=intersects[0].object
           if(obj.name.includes('网格')){
-            console.log(obj.parent);
             const current=obj.parent
+            console.log(current);
             //把这个group的材质改为透明
             current.traverse((item)=>{
               if(item.isMesh){
@@ -325,13 +440,12 @@ export default {
             })
           }else{
             console.log(obj);
+
           }
         }
       })
     },
-
-
-   async initSceneWeather(){
+    async initSceneWeather(){
       let weather=null
       if(localStorage.getItem('weather')){
         weather=JSON.parse(localStorage.getItem('weather'))
@@ -383,6 +497,42 @@ export default {
         return ''
       }
     },
+    //获取维修设备
+    async getRepairDevice(){
+      try{
+        const res=await getRepairDevice()
+        if(res.code==200) {
+          return res.data
+        }else{
+          ElMessage.warning('获取维修设备失败')
+          return []
+        }
+      }catch (e) {
+        ElMessage.warning('服务器出错了')
+        return []
+      }
+    },
+    async setRepairDeviceCard(){
+      const devices= await this.getRepairDevice()
+      console.log(this.fireHydrant);
+      console.log(devices);
+      devices.forEach(device=>{
+        if(device.deviceName.includes('消防栓')){
+          this.fireHydrant.forEach((item)=>{
+            if(item.name===device.modelName){
+              this.setIcon(item.mesh.position,device.deviceName,'fire')
+            }
+          })
+        }else if(device.deviceName.includes('门')){
+          this.doors.forEach((item)=>{
+            if(item.name===device.modelName){
+              this.setIcon(item.mesh.position,device.deviceName,'door')
+            }
+          })
+        }
+
+      })
+    },
     disposeWeather(){
       this.weatherTexture && this.weatherTexture.dispose()
       this.weatherGeometry && this.weatherGeometry.dispose()
@@ -392,17 +542,26 @@ export default {
         this.weatherParticles.material.dispose()
         this.scene.remove(this.weatherParticles)
       }
-    }
+    },
 
   },
 
 }
 </script>
-<style scoped>
+<style lang="scss" scoped>
 .gl-container {
   width: 100%;
   height: 100%;
   border: 1px solid #0c8ee8;
   box-shadow: 0 0 5px #0c8ee8;
+
 }
+.card{
+  position: absolute;
+  pointer-events: none;
+  color: #00a6ff;
+  font-size: 0.5px;
+  font-weight: bold;
+}
+
 </style>

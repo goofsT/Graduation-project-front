@@ -55,10 +55,12 @@ const showDevice=ref(false)
 const showAffairs=ref(false)
 
 
+const emit=defineEmits(['controlChange'])
 const changeStatus=(type)=>{
   type==='weather' && (showWeather.value=!showWeather.value)
   type==='device' && (showDevice.value=!showDevice.value)
   type==='affair' && (showAffairs.value=!showAffairs.value)
+  emit('controlChange',{showWeather:showWeather.value,showDevice:showDevice.value,showAffairs:showAffairs.value})
 }
 </script>
 <style scoped lang="scss">
@@ -76,6 +78,7 @@ const changeStatus=(type)=>{
   transform: translateX(-50%);
   background-color: transparent!important;
   opacity: 0.8;
+  z-index: 999;
   .scene_control{
     position: absolute;
     left:-190px;
