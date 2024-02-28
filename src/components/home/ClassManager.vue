@@ -7,7 +7,7 @@
       </el-sub-menu>
     </el-menu>
 
-    <el-card class="class-card" v-for="item in classInfo">
+    <el-card class="class-card" v-for="item in classInfo" @click="roomClick(item)">
       <template #header>
         <div class="card-header">
           <div>{{item.roomName}}</div>
@@ -21,6 +21,9 @@
           <div>课程：{{item.course.courseName || '暂无'}}</div>
           <div>时间段:{{item.course.courseTimeStart.slice(11,16)+ '-'+item.course.courseTimeEnd.slice(11,16)|| '暂无'}}</div>
         </div>
+      <div class="card-body" v-else>
+        <div style="height:50px">无人使用</div>
+      </div>
     </el-card>
   </div>
 </template>
@@ -28,7 +31,9 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
 import {getClassRoomByFloor} from '@/api/ClassRoom.ts'
+import {useCurrentRoom} from "@/store/currentRoom.ts";
 import { ElMessage } from "element-plus";
+const currentRoom=useCurrentRoom()
 //导航选项
 const classNavList = reactive([
   {
@@ -72,6 +77,9 @@ onBeforeUnmount(()=>{
   timer.value && clearInterval(timer.value)
 })
 
+const roomClick=(room)=>{
+  currentRoom.setRoomInfo(room)
+}
 
 const handleSelect = (key: string, keyPath: string[]) => {
   activeBuilding.value = key.slice(0, 1);
@@ -83,6 +91,7 @@ const getFloorClass=async (building:string,floor:string)=>{
     const res=await getClassRoomByFloor(building,floor)
     if(res.code===200){
       Object.assign(classInfo,res.data)
+      console.log(classInfo);
     }else{
       ElMessage.warning("获取教室信息失败！")
     }

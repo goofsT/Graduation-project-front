@@ -11,7 +11,7 @@
       </div>
       <el-scrollbar height="250" style="margin-top:40px;">
         <div class="block" v-for="item in lightList" :style="{background:getLightBackground(item.deviceStatus)}">
-          {{item.deviceName.slice(0,-2)}}
+          <span  @click="deviceStatusClick(item)">{{item.deviceName.slice(0,-2)}}</span>
         </div>
       </el-scrollbar>
     </div>
@@ -25,8 +25,8 @@
         </div>
       </div>
       <el-scrollbar height="250px" style="margin-top:40px;">
-        <div class="block" v-for="item in doorList" :style="{background:getLightBackground(item.deviceStatus)}">
-          {{item.deviceName.slice(0,-2)}}
+        <div class="block" v-for="item in doorList" :style="{background:getLightBackground(item.deviceStatus)}" >
+          <span @click="deviceStatusClick(item)">{{item.deviceName.slice(0,-2)}}</span>
         </div>
       </el-scrollbar>
     </div>
@@ -40,7 +40,7 @@
       </div>
       <el-scrollbar height="250px" style="margin-top:40px;">
         <div class="block" v-for="item in fireList" :style="{background:getLightBackground(item.deviceStatus)}">
-          {{item.deviceName.slice(0,-3)}}
+          <span @click="deviceStatusClick(item)">{{item.deviceName.slice(0,-3)}}</span>
         </div>
       </el-scrollbar>
     </div>
@@ -50,11 +50,13 @@
 <script setup lang="ts">
 import{getAllDevice} from "@/api/device.ts";
 import { onBeforeUnmount, onMounted, ref } from "vue";
+import { useCurrentDevice } from "@/store/currentDevice.ts";
 import { ElMessage } from "element-plus";
 const lightList=ref([])
 const doorList=ref([])
 const fireList=ref([])
 const timer=ref<any>(null)
+const currentDevice=useCurrentDevice()
 
 onMounted(()=>{
   getData()
@@ -65,6 +67,10 @@ onMounted(()=>{
 onBeforeUnmount(()=>{
   timer.value && clearInterval(timer.value)
 })
+
+const deviceStatusClick=(item:any)=>{
+  currentDevice.setDeviceInfo(item)
+}
 
 //获取设备列表
 const getData=async()=>{

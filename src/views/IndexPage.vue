@@ -29,9 +29,6 @@
       <div :style="!showLiveBlock?'right:-290px':''" class="right-box-live">
         <LiveAffairs @updateShow="showLiveUpdate" name="live"/>
       </div>
-      <div :style="!showOtherBlock?'right:-290px':''" class="right-box-other">
-        <LiveAffairs @updateShow="showLiveUpdate" name="other"/>
-      </div>
     </div>
     <div class="footer">footer</div>
   </div>
@@ -48,14 +45,9 @@ const handleTabClick = () => {};
 
 
 //控制场景右侧弹出框的显示与隐藏
-const showLiveBlock=ref(true)
-const showOtherBlock=ref(true)
+const showLiveBlock=ref(false)
 const showLiveUpdate=(obj:any)=>{
-  if(obj.name==='live'){
     showLiveBlock.value=obj.isShow
-  }else{
-    showOtherBlock.value=obj.isShow
-  }
 }
 
 
@@ -122,16 +114,13 @@ const showLiveUpdate=(obj:any)=>{
     .right-box-other {
       position: absolute;
       right: 0;
-      top: 90px;
+      top: 250px;
       width: 300px;
       padding: 5px 10px;
       border: 1px solid #0c8ee8;
       box-shadow: 0 0 5px #0c8ee8;
       background-color: #001525;
       transition: all 0.3s linear;
-    }
-    .right-box-other {
-      top: 490px;
     }
   }
 }

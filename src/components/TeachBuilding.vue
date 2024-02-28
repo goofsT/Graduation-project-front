@@ -21,6 +21,12 @@ import { ElMessage } from "element-plus";
 import { getRepairDevice } from "@/api/device.ts";
 import { GammaCorrectionShader } from "three/examples/jsm/shaders/GammaCorrectionShader";
 import { SMAAPass } from "three/examples/jsm/postprocessing/SMAAPass";
+import { useCurrentDevice } from "@/store/currentDevice.ts";
+import {useCurrentRoom} from "@/store/currentRoom.ts";
+const currentRoom=useCurrentRoom()
+const currentDevice=useCurrentDevice()
+import {watch} from "vue";
+import TWEEN from '@tweenjs/tween.js'
 //添加坐标轴辅助
 export default {
   name: 'TeachBuilding',
@@ -62,7 +68,8 @@ export default {
       fireHydrant:[],//消防栓
       rayCasterMeshes:[],//射线检测的mesh
       showWeather:false,//是否显示天气
-      cardGroup:null,//卡片group
+      showRepairDevice:false,//是否显示维修设备
+      showDeviceCard:false,//是否显示设备卡片
       iconGroup:null,//图标group
     }
   },
@@ -70,11 +77,19 @@ export default {
     controlObj:{
       handler(val){
         this.showWeather=val.showWeather
+        this.showRepairDevice=val.showDevice
       },
       deep:true
-    }
+    },
   },
   mounted() {
+    //监听设备卡片
+    watch(() => currentDevice.device, (newDeviceInfo) => {
+      this.setDeviceCard(newDeviceInfo)
+    });
+    watch(() => currentRoom.room, (newRoom) => {
+      this.setRoomCard(newRoom)
+    })
     this.getContainerInfo()
     this.initSeen()
   },
@@ -91,10 +106,7 @@ export default {
     },
     initSeen(){
       this.scene = new THREE.Scene()
-      this.cardGroup= new THREE.Group();
       this.iconGroup=new THREE.Group();
-      this.scene.add(this.cardGroup)
-      this.scene.add(this.iconGroup)
       this.scene.fog=new THREE.Fog('#6c6969',0.015,500)
       //添加天空盒子纹理
       const skybox = new THREE.CubeTextureLoader()
@@ -102,7 +114,6 @@ export default {
         .load( [ 'px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg' ] );
       this.scene.background = skybox
       this.scene.environment = skybox
-
       this.camera = new THREE.PerspectiveCamera(45,this.containerWidth/this.containerHeight,0.1,200)
       this.camera.position.set(18,8,0)
       this.camera.lookAt(0,0,0)
@@ -205,76 +216,33 @@ export default {
       const smaaPass = new SMAAPass(this.containerWidth * pixelRatio, this.containerHeight * pixelRatio);
       this.composer.addPass(smaaPass);
     },
-    //设置建筑名称
-    setBuildingName(){
-      // 创建CSS3D对象
-      const element = document.createElement('div');
-      const element1 = document.createElement('div');
-      element.className='buildingName'
-      element1.className='buildingName'
-      element.innerHTML='1号教学楼'
-      element1.innerHTML='2号教学楼'
-      this.title = new CSS3DObject(element);
-      this.title1=new CSS3DObject(element1)
-      this.title.position.set(0, 5, 5);
-      this.title1.position.set(0, 5, -5);
-      this.scene.add(this.title);
-      this.scene.add(this.title1);
-    },
-    //设置卡片
-    setCard(position,name){
-      const card = document.createElement('div');
-      card.innerHTML=`
-       ${name}损坏
-      `
-      card.style.fontSize='3px'
-      card.style.color='#e51b6f'
-      card.style.width='30px'
-      card.style.height='8px'
-      card.style.pointerEvents='none'
-      card.style.background='url(images/card.png) no-repeat center center / 100% 100%'
-      this.card = new CSS3DObject(card);
-      //缩小卡片
-      this.card.scale.set(0.1,0.1,0.1)
-      this.card.position.set(position.x,position.y,position.z);
-      this.cardGroup.add(this.card)
-      this.scene.add(this.cardGroup);
-
-    },
-    //设置图标
-    setIcon(position,name,type){
-      const icon=document.createElement('div')
-      let iconClassName=''
-      if(type==='fire'){
-        iconClassName='icon-fire_warning'
-      }else if(type==='door'){
-        iconClassName='icon-door_repair-copy'
-      }
-      icon.innerHTML =`
-      <i class="iconfont ${iconClassName}" style="font-size: 4px;color:red"></i>
-      <div style="font-size: 2px;font-weight: normal;border-radius: 1px;background-color:rgba(14,14,14,0.7);">设备损坏</div>
-      `
-      this.icon = new CSS3DObject(icon);
-      this.icon.scale.set(0.1,0.1,0.1)
-      this.icon.position.set(position.x,position.y,position.z);
-      this.iconGroup.add(this.icon)
-      this.scene.add(this.iconGroup);
-    },
     render(){
+      TWEEN.update()
       this.control.update()
       this.renderWeather()
-      this.composer.render()//使用效果合成器渲染
+      this.renderRepairDevice()
       this.title.lookAt(this.camera.position)
       this.title1.lookAt(this.camera.position)
-      this.cardGroup.children.forEach((card) => {
-        card.lookAt(this.camera.position);
-      });
+      this.card && this.card.lookAt(this.camera.position)
       this.iconGroup.children.forEach((icon) => {
         icon.lookAt(this.camera.position);
       });
       //this.renderer.render(this.scene, this.camera)
+      this.composer.render()//使用效果合成器渲染
       this.css3DRenderer.render(this.scene, this.camera);
       this.renderId = requestAnimationFrame(this.render)
+    },
+    renderRepairDevice(){
+      if (this.showRepairDevice) {
+        if (!this.scene.children.includes(this.iconGroup)) {
+          this.scene.add(this.iconGroup);
+        }
+      } else {
+        this.scene.remove(this.iconGroup);
+        this.iconGroup.children.forEach((icon) => {
+          icon.element.style.display = 'none';
+        });
+      }
     },
     renderWeather(){
       if(this.showWeather && this.weatherParticles){
@@ -298,7 +266,7 @@ export default {
       dracoLoader.setDecoderPath('/draco/gltf/')
       modelLoader.setDRACOLoader(dracoLoader)
       //加载模型
-      modelLoader.load('/model/教学楼1.glb', (glb) => {
+      modelLoader.load('/model/building.glb', (glb) => {
         const model = glb.scene
         //遍历模型中的所有建筑
         this.scene.add(model)
@@ -323,6 +291,7 @@ export default {
           }
         })
         this.handleRaycaster()//射线检测
+        this.initRepairDevice()
         // console.log('左边教室灯',this.leftClassLight);
         // console.log('右边教室灯',this.rightClassLight);
         // console.log('左边走廊灯',this.corridorLightLeft);
@@ -332,7 +301,6 @@ export default {
         // console.log('左大门',this.leftBuildingDoor);
         // console.log('右大门',this.rightBuildingDoor);
         // console.log('消防栓',this.fireHydrant);
-        this.setRepairDeviceCard()
 
       })
     },
@@ -357,6 +325,7 @@ export default {
       if(mesh.name.includes('door')&&mesh.name.includes('left')) {
         this.classDoorLeft.push({name:mesh.name,mesh,light})
       }
+      this.lights.push({name:mesh.name,mesh})
     },
     saveDoor(mesh){
       if(mesh.name.includes('door')&&mesh.name.includes('right')) {
@@ -414,6 +383,14 @@ export default {
       const mesh = new THREE.Mesh(mergedGeometry, new THREE.MeshStandardMaterial());
       mesh.name=name
       return mesh;
+    },
+    animateCamera(position){
+      const jsonStr = position.replace(/(\w+):/g, '"$1":');
+      const obj = JSON.parse(jsonStr);
+      new TWEEN.Tween(this.camera.position)
+        .to(obj, 2000)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .start();
     },
     //射线检测
     handleRaycaster(){
@@ -512,21 +489,25 @@ export default {
         return []
       }
     },
-    async setRepairDeviceCard(){
+    async initRepairDevice(){
       const devices= await this.getRepairDevice()
-      console.log(this.fireHydrant);
-      console.log(devices);
       devices.forEach(device=>{
         if(device.deviceName.includes('消防栓')){
           this.fireHydrant.forEach((item)=>{
             if(item.name===device.modelName){
-              this.setIcon(item.mesh.position,device.deviceName,'fire')
+              this.setRepairIcon(item.mesh.position,device.deviceName,'fire')
             }
           })
         }else if(device.deviceName.includes('门')){
           this.doors.forEach((item)=>{
             if(item.name===device.modelName){
-              this.setIcon(item.mesh.position,device.deviceName,'door')
+              this.setRepairIcon(item.mesh.position,device.deviceName,'door')
+            }
+          })
+        }else if(device.deviceName.includes('灯')){
+          this.lights.forEach((item)=>{
+            if(item.name===device.modelName){
+              this.setRepairIcon(item.mesh.position,device.deviceName,'light')
             }
           })
         }
@@ -542,6 +523,134 @@ export default {
         this.weatherParticles.material.dispose()
         this.scene.remove(this.weatherParticles)
       }
+    },
+    //设置建筑名称
+    setBuildingName(){
+      // 创建CSS3D对象
+      const element = document.createElement('div');
+      const element1 = document.createElement('div');
+      element.className='buildingName'
+      element1.className='buildingName'
+      element.innerHTML='1号教学楼'
+      element1.innerHTML='2号教学楼'
+      element.style.color='#378de3'
+      element1.style.color='#378de3'
+      element1.style.fontWeight='bold'
+      element.style.fontWeight='bold'
+      this.title = new CSS3DObject(element);
+      this.title1=new CSS3DObject(element1)
+      this.title.position.set(0, 5, 5);
+      this.title1.position.set(0, 5, -5);
+      this.scene.add(this.title);
+      this.scene.add(this.title1);
+    },
+    //设置卡片
+    setCard(position,name,data){
+      if(name.includes('灯')){position.y-=0.1}
+      const {icon,status,color}=this.getDeviceInfo(data)
+      this.card && this.scene.remove(this.card)
+      const card = document.createElement('div');
+      card.innerHTML=`
+       <div style="position:absolute">
+          <div class="iconfont ${icon}" style="font-size: 3px;color:${color}"></div>
+          <div style="font-size: 2.5px">设备名：${name}</div>
+          <div style="font-size: 2.5px">状态：${status}</div>
+       </div>
+      `
+      card.style.fontSize='1px'
+      card.style.width='35px'
+      card.style.height='15px'
+      card.style.pointerEvents='none'
+      card.style.background='url(images/card.png) no-repeat center center / 100% 100%'
+      this.card = new CSS3DObject(card);
+      this.card.scale.set(0.01,0.01,0.01)
+      this.card.position.set(position.x,position.y,position.z);
+      this.scene.add(this.card);
+      this.animateCamera(data.modelPosition)
+      if (this.disposeCardTimer) {
+        clearTimeout(this.disposeCardTimer);
+      }
+      this.disposeCardTimer=setTimeout(()=>{
+        this.disposeCard()
+      },10000)
+    },
+    disposeCard(){
+      this.card && this.scene.remove(this.card)
+      new TWEEN.Tween(this.camera.position)
+        .to({x:18,y:8,z:0},2000)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .start();
+    },
+    setDeviceCard(device){
+      if(device.deviceType==='0'){
+        this.lights.forEach((light)=>{
+          if(light.name===device.modelName){
+            this.setCard(light.mesh.position,device.deviceName,device)
+          }
+        })
+      }else if(device.deviceType==='1'){
+        this.doors.forEach((door)=>{
+          if(door.name===device.modelName){
+            this.setCard(door.mesh.position,device.deviceName,device)
+          }
+        })
+      }else{
+        this.fireHydrant.forEach((fire)=>{
+          if(fire.name===device.modelName){
+            this.setCard(fire.mesh.position,device.deviceName,device)
+          }
+        })
+      }
+    },
+    setRoomCard(room){
+      console.log(room);
+    },
+    getDeviceInfo(device){
+      let status,icon,color
+      const colorObj={'0':'#3df613','1':'#18598d','2':'#e14545'}
+      const statusObj={'0':'打开','1':'关闭','2':'维修中'}
+      const iconObj={
+        '0':{'0':'icon-light_open','1':'icon-light_close','2':'icon-light_repair-copy'},
+        '1':{'0':'icon-door_open','1':'icon-door_close','2':'icon-door_repair-copy'},
+        '2':{'0':'icon-fire_normal','1':'icon-fire_normal','2':'icon-fire_warning'}
+      }
+      if(device.deviceType==='0'){
+        status=statusObj[device.deviceStatus]
+        icon=iconObj['0'][device.deviceStatus]
+      }else if(device.deviceType==='1'){
+        status=statusObj[device.deviceStatus]
+        icon=iconObj['1'][device.deviceStatus]
+      }else{
+        status=statusObj[device.deviceStatus]
+        icon=iconObj['2'][device.deviceStatus]
+      }
+      color=colorObj[device.deviceStatus]
+      return {status,icon,color}
+    },
+    //设置维修设备图标
+    setRepairIcon(position,name,type){
+      const icon=document.createElement('div')
+      let iconClassName=''
+      if(type==='fire'){
+        iconClassName='icon-fire_warning'
+      }else if(type==='door'){
+        iconClassName='icon-door_repair-copy'
+      }else if(type==='light'){
+        iconClassName='icon-light_repair-copy'
+      }
+      icon.innerHTML =`
+      <div style="display: flex;justify-content: center;align-items: center;flex-wrap: wrap">
+        <div class="iconfont ${iconClassName}" style="font-size: 4px;color:red;width:100%;text-align: center"></div>
+        <div style="font-size: 2px;font-weight: normal;border-radius: 1px;background-color:rgba(14,14,14,0.8);">
+          <div>设备名：${name}</div>
+          <div style="color:red;font-weight: bold">设备损坏</div>
+        </div>
+      </div>
+      `
+      this.icon = new CSS3DObject(icon);
+      this.icon.scale.set(0.1,0.1,0.1)
+      this.icon.position.set(position.x,position.y-0.3,position.z);
+      this.iconGroup.add(this.icon)
     },
 
   },
@@ -559,9 +668,7 @@ export default {
 .card{
   position: absolute;
   pointer-events: none;
-  color: #00a6ff;
   font-size: 0.5px;
-  font-weight: bold;
 }
 
 </style>

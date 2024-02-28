@@ -15,7 +15,8 @@
     <div class="scene_control">
       <div :style="{background:showWeather?'#27a0f3':'#567988'}" @click="changeStatus('weather')">场景天气</div>
       <div :style="{background:showDevice?'#27a0f3':'#567988'}" @click="changeStatus('device')">维修设备</div>
-      <div :style="{background:showAffairs?'#27a0f3':'#567988'}" @click="changeStatus('affair')">事务提醒</div>
+      <div :style="{background:showAffairs?'#27a0f3':'#567988'}" @click="changeStatus('affair')">初始位置</div>
+
     </div>
 
   </div>
