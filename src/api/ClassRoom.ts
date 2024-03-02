@@ -17,3 +17,8 @@ export const getClassRoom = () => {
 export const getClassRoomByFloor = (building: string, floor: string) => {
   return $api.get(`/getClassRoomByFloor?building=${building}&floor=${floor}`);
 };
+
+//更新教室状态
+export const updateClassRoomStatus = (roomId: number, status: String) => {
+  return $api.post("/updateClassRoomStatus", { roomId, status });
+};

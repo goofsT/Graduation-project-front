@@ -14,13 +14,18 @@
             <template #label><span class="custom-tabs-label"><i class="iconfont icon-icon-shezhi"></i><span>设备状态</span></span></template>
             <DeviceStatus/>
           </el-tab-pane>
-          <el-tab-pane label="实时事务" name="third">
-            <template #label><span class="custom-tabs-label"><i class="iconfont icon-icon-yonghu"></i><span>实时事务</span></span></template>
-          </el-tab-pane>
           <el-tab-pane label="实时教室" name="fourth">
             <template #label><span class="custom-tabs-label"><i class="iconfont icon-kongjiaoshichaxun-01"></i><span>实时教室</span></span></template>
             <ClassManager/>
           </el-tab-pane>
+          <el-tab-pane v-if="userType=='0'" label="维修事务" name="third">
+            <template #label><span class="custom-tabs-label"><i class="iconfont icon-icon-yonghu"></i><span>维修事务</span></span></template>
+          </el-tab-pane>
+          <el-tab-pane v-if="userType=='2'" label="维修事务" name="third">
+            <template #label><span class="custom-tabs-label"><i class="iconfont icon-icon-yonghu"></i><span>维修事务</span></span></template>
+            <RepairAffairs/>
+          </el-tab-pane>
+
         </el-tabs>
       </div>
       <div class="center" :style="{}">
@@ -40,7 +45,12 @@ import HomeHeader from "@/components/home/HomeHeader.vue";
 import LiveData from "@/components/home/LiveData.vue";
 import ClassManager from "@/components/home/ClassManager.vue";
 import DeviceStatus from "@/components/home/DeviceStatus.vue";
+import RepairAffairs from "@/components/home/RepairAffairs.vue";
 const activeName = ref("first");
+const userType=ref('0')
+onMounted(() => {
+  userType.value=JSON.parse(localStorage.getItem("userInfo")!).premission
+});
 const handleTabClick = () => {};
 
 

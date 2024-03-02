@@ -6,6 +6,27 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "9332438",
+      "name": "维修中",
+      "font_class": "weixiuzhong",
+      "unicode": "e763",
+      "unicode_decimal": 59235
+    },
+    {
+      "icon_id": "36179966",
+      "name": "上课中",
+      "font_class": "shangkezhong1",
+      "unicode": "e74f",
+      "unicode_decimal": 59215
+    },
+    {
+      "icon_id": "36231316",
+      "name": "空闲中",
+      "font_class": "kongxianzhong",
+      "unicode": "e750",
+      "unicode_decimal": 59216
+    },
+    {
       "icon_id": "12754636",
       "name": "light_close",
       "font_class": "light_close",

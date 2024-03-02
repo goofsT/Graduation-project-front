@@ -8,3 +8,13 @@ export const getAllDevice = () => {
 export const getRepairDevice = () => {
   return $api.get("/getRepairDevice");
 };
+
+//设置维修设备
+export const updateDeviceStatus = (deviceId: number,deviceStatus:String) => {
+  return $api.post("/updateDeviceStatus", { deviceId ,deviceStatus});
+};
+
+//删除设备
+export const deleteDevice = (deviceId: number) => {
+  return $api.post("/deleteDevice", { deviceId });
+};

@@ -224,6 +224,7 @@ export default {
       this.title.lookAt(this.camera.position)
       this.title1.lookAt(this.camera.position)
       this.card && this.card.lookAt(this.camera.position)
+      this.roomCard && this.roomCard.lookAt(this.camera.position)
       this.iconGroup.children.forEach((icon) => {
         icon.lookAt(this.camera.position);
       });
@@ -391,6 +392,16 @@ export default {
         .to(obj, 2000)
         .easing(TWEEN.Easing.Quadratic.Out)
         .start();
+    },
+    animateRoomCamer(position){
+      const p=Object.assign({},position)
+      p.z=p.z>0?1:-1
+      new TWEEN.Tween(this.camera.position)
+        .to(p, 2000)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .start();
+      this.control.target.set(position.x,position.y,position.z)
+      this.control.update()
     },
     //射线检测
     handleRaycaster(){
@@ -574,12 +585,67 @@ export default {
         this.disposeCard()
       },10000)
     },
+    setRoom(position,name,data){
+      this.roomCard && this.scene.remove(this.roomCard)
+      const card = document.createElement('div');
+      let height
+      if(data.status==='0'){
+        card.innerHTML=`
+       <div style="position:absolute;padding:1px;font-size: 2.5px;color:#0be8e1">
+          <div style="color:#10c710;position:absolute;right:-8px;font-size: 5px" class="iconfont icon-kongxianzhong" ></div>
+          <div>教室：${name}</div>
+          <div>状态: 空闲中</div>
+       </div>
+      `
+        height='11px'
+      }else if(data.status==='1'){
+        card.innerHTML=`
+       <div style="position:absolute;padding:1px;font-size: 2.5px;color:#0be8e1">
+          <div style="font-size: 5px;color:#0e91ee;position:absolute;right:-8px" class="iconfont icon-shangkezhong1"></div>
+          <div>教室：${name}</div>
+          <div>老师：${data.course.teacher.teacherName}</div>
+          <div>课程：${data.course.courseName} </div>
+          <div>时间：${data.course.courseTimeStart.slice(11, 16)}-${data.course.courseTimeEnd.slice(11, 16)}</div>
+          <div>班级: ${ data.course.sclass.className}</div>
+       </div>
+      `
+        height='25px'
+      }else{
+        card.innerHTML=`
+       <div style="position:absolute;padding:1px;font-size: 2.5px;color:#0be8e1">
+          <div style="color:red;position:absolute;right:-8px;font-size: 5px" class="iconfont icon-weixiuzhong" ></div>
+          <div>教室：${name}</div>
+          <div>状态：维修中</div>
+       </div>
+      `
+        height='11px'
+      }
+      card.style.fontSize='1px'
+      card.style.width='35px'
+      card.style.height=height
+      card.style.pointerEvents='none'
+      card.style.background='url(images/card.png) no-repeat center center / 100% 100%'
+      this.roomCard = new CSS3DObject(card);
+      this.roomCard.scale.set(0.05,0.05,0.05)
+      this.roomCard.position.set(position.x,position.y+0.5,position.z);
+      this.scene.add(this.roomCard);
+      this.animateRoomCamer(position)
+      if (this.disposeRoomCardTimer) {
+        clearTimeout(this.disposeRoomCardTimer);
+      }
+      this.disposeRoomCardTimer=setTimeout(()=>{
+        this.disposeCard()
+      },10000)
+    },
     disposeCard(){
       this.card && this.scene.remove(this.card)
+      this.roomCard && this.scene.remove(this.roomCard)
       new TWEEN.Tween(this.camera.position)
         .to({x:18,y:8,z:0},2000)
         .easing(TWEEN.Easing.Quadratic.Out)
         .start();
+      this.control.target.set(0,0,0)
+      this.control.update()
     },
     setDeviceCard(device){
       if(device.deviceType==='0'){
@@ -603,7 +669,11 @@ export default {
       }
     },
     setRoomCard(room){
-      console.log(room);
+      this.doors.forEach(door=>{
+        if(door.name===room.positionModel){
+          this.setRoom(door.mesh.position,room.roomName,room)
+        }
+      })
     },
     getDeviceInfo(device){
       let status,icon,color

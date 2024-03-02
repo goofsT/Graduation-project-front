@@ -91,7 +91,6 @@ const getFloorClass=async (building:string,floor:string)=>{
     const res=await getClassRoomByFloor(building,floor)
     if(res.code===200){
       Object.assign(classInfo,res.data)
-      console.log(classInfo);
     }else{
       ElMessage.warning("获取教室信息失败！")
     }

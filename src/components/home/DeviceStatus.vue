@@ -34,7 +34,8 @@
       <div class="status_title">
         <div class="status_title_text">消防栓</div>
         <div class="status_title_legend">
-          <div style="background: #18598d"></div>正常使用
+
+          <div style="background: #409840"></div>正常使用
           <div style="background: #ff0000"></div>维修
         </div>
       </div>

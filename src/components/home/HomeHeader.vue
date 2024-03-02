@@ -16,6 +16,7 @@
         </div>
       </div>
     </div>
+    <div class="data-manager" v-if="userInfo.premission=='0'" @click="toManager">{{btnText}}</div>
     <div class="info">
       <span>{{handleUserText()}}</span>
       <i class="iconfont icon-icon-dengjilikai" @click="loginOut"></i>
@@ -31,22 +32,34 @@ import { ElMessage } from "element-plus";
 import router from "@/router";
 
 const userInfo=useUserStore().getUser()
-
+const showManager=ref(false)
+const btnText=ref('数据管理')
 
 onMounted(()=>{
   getWeatherInfo()
 })
 
 
+const toManager=()=>{
+  showManager.value=!showManager.value
+  if(showManager.value) {
+    btnText.value = "楼栋场景"
+    router.replace('/manage')
+  } else {
+    btnText.value = "数据管理"
+    router.replace('/home')
+  }
+}
+
 const handleUserText=()=>{
   if(userInfo.premission=='0'){
     return userInfo.realname+' [管理员]'
   }else if(userInfo.premission=='1'){
-    return userInfo.realname+' [值班人员]'
-  }else if(userInfo.premission=='2'){
     return userInfo.realname+' [普通用户]'
+  }else if(userInfo.premission=='2'){
+    return userInfo.realname+' [维修人员]'
   }else{
-    return userInfo.premission+' [维修人员]'
+    return userInfo.premission+' [值班人员]'
   }
 }
 
@@ -117,6 +130,19 @@ const getWeatherInfo=async ()=>{
       font-size: 12px;
     }
   }
+  .data-manager{
+    position:absolute;
+    right:180px;
+    border:2px solid #2eb9f5;
+    border-radius: 5px;
+    padding:5px;
+    font-weight: bold;
+    color: #ebedf1;
+    &:hover{
+      background-color: #1a475d;
+      cursor: pointer;
+    }
+  }
   .info{
     position: absolute;
     right: 0;
@@ -130,14 +156,14 @@ const getWeatherInfo=async ()=>{
     font-size: 15px;
     font-weight: bold;
     .iconfont{
-      color: #7ce078;
+      color: #3cb2bd;
       font-size: 40px;
       margin-left: 5px;
       font-weight: bolder;
       &:hover{
         font-size: 42px;
         cursor: pointer;
-        color: #10e307;
+        color: #05ddf1;
       }
     }
   }
