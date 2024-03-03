@@ -4,6 +4,11 @@ export const getAllClassRoom = () => {
   return $api.get("/getClassRoom");
 };
 
+//根据时间获取空闲教室
+export const getFreeClassRoom = (time: string) => {
+  return $api.get(`/getClassRoomFreeByTime?time=${time}`);
+};
+
 //获取维修中的教室
 export const getRepairClassRoom = () => {
   return $api.get("/getRepairClassRoom");

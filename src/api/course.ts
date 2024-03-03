@@ -20,3 +20,7 @@ export const updateCourse = (course: any) => {
   return $api.post(`/updateCourse`, { ...course});
 }
 
+export const getCourseByTime= (time: string) => {
+  return $api.get(`/getCourseByTime?time=${time}`);
+}
+
