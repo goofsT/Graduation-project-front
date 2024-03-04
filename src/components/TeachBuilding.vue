@@ -467,7 +467,7 @@ export default {
       this.weatherGeometry.setAttribute('position',new THREE.Float32BufferAttribute(this.weatherVertices,3))
       //创建材质
       this.snowMaterial=new THREE.PointsMaterial({
-        size:1,//大小
+        size:0.5,//大小
         transparent:true,//允许透明
         alphaTest:0.5,//如果不透明度低于此值，则不会渲染材质。默认值为0。
         alphaMap:this.weatherTexture,//一张灰度纹理，用于控制整个表面的不透明度。（黑色：完全透明；白色：完全不透明）

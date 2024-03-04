@@ -1,7 +1,7 @@
 <template>
   <div class="course-container">
     <div class="course-control">
-      <el-button type="primary" @click="addCourse">添加课程</el-button>
+      <el-button type="primary" @click="clickAddCourse">添加课程</el-button>
       <el-button type="primary" @click="getCurrentCourse">当前课程</el-button>
       <el-button type="primary" @click="getSoonCourse">即将上课</el-button>
       <div>
@@ -69,8 +69,9 @@
       :show-close="false"
       @close="dialogClose"
       v-model="dialogFormVisible"
-      title="修改课程"
+      :title="dialogTitle"
       width="500"
+      center
     >
       <el-form :model="form">
         <el-form-item label="课程名" label-width="100">
@@ -123,6 +124,7 @@
           <el-date-picker
             style="width: 300px"
             v-model="form.courseTimeStart"
+            @change="getFreeClassRooms(form.courseTimeStart)"
             type="datetime"
             value-format="YYYY-MM-DD HH:mm:ss"
             placeholder="选择开始时间"
@@ -171,6 +173,7 @@ const isLoading = ref(false);
 const dialogFormVisible = ref(false);
 const searchTime = ref("");
 const courseTitle = ref("当前课程");
+const dialogTitle=ref('')
 const form = ref({
   courseId: "",
   courseName: "",
@@ -187,19 +190,34 @@ onMounted(() => {
   getTeacherList();
 });
 
-//提交修改
+//提交弹框
 const submit = async () => {
-  try {
-    const res = await updateCourse(form.value);
-    if (res.code == 200) {
-      ElMessage.success("修改成功");
-      dialogFormVisible.value = false;
-      setCourseByTime();
-    } else {
+  if(dialogTitle.value=='添加课程') {
+    try {
+      const res = await addCourse(form.value);
+      if (res.code == 200) {
+        ElMessage.success("添加成功");
+        dialogFormVisible.value = false;
+        resetCourseList()
+      } else {
+        ElMessage.error("添加失败");
+      }
+    } catch (e) {
+      ElMessage.error("添加失败");
+    }
+  }else{
+    try {
+      const res = await updateCourse(form.value);
+      if (res.code == 200) {
+        ElMessage.success("修改成功");
+        dialogFormVisible.value = false;
+        resetCourseList()
+      } else {
+        ElMessage.error("修改失败");
+      }
+    } catch (e) {
       ElMessage.error("修改失败");
     }
-  } catch (e) {
-    ElMessage.error("修改失败");
   }
 };
 
@@ -217,7 +235,7 @@ const dialogClose = () => {
 };
 
 const disabledEndDate = (time) => {
-  return time.getTime() <= new Date(form.value.courseTimeStart).getTime();
+  return time.getTime() < new Date(form.value.courseTimeStart).getTime();
 };
 
 const setCourseByTime = () => {
@@ -242,10 +260,35 @@ const setCourseByTime = () => {
   }
 };
 
-const addCourse = () => {};
+const clickAddCourse = () => {
+  dialogTitle.value = "添加课程";
+  dialogFormVisible.value = true;
+  form.value = {
+    courseId: "",
+    courseName: "",
+    classId: "",
+    roomId: "",
+    teacherId: "",
+    courseTimeStart: "",
+    courseTimeEnd: "",
+  };
+  delete form.value.courseId;
+};
 
-//修改课程
+//重置课程列表
+const resetCourseList = () => {
+  if(courseTitle.value=='当前课程') {
+    getCurrentCourse();
+  }else if(courseTitle.value=='即将上课'){
+    getSoonCourse();
+  }else{
+    setCourseByTime();
+  }
+};
+
+//点击修改课程 出现弹出框 并获取空闲教室
 const handleUpdateCourse = (row) => {
+  dialogTitle.value = "修改课程";
   dialogFormVisible.value = true;
   form.value = row;
   getFreeClassRooms(row.courseTimeStart);
@@ -262,7 +305,7 @@ const handleDelete = async (row: any) => {
       const res = await deleteCourse(row.courseId);
       if (res.code == 200) {
         ElMessage.success("删除成功");
-        setCourseByTime();
+        resetCourseList()
       } else {
         ElMessage.error("删除失败");
       }
@@ -286,7 +329,13 @@ const getClassList = () => {
 const getFreeClassRooms = (time) => {
   getFreeClassRoom(time).then((res: any) => {
     if (res.code === 200) {
-      classRoomList.value = res.data;
+      if(res.data.length==0){
+        ElMessage.warning('当前时间无空闲教室')
+        form.value.roomId = '';
+      }else{
+        classRoomList.value = res.data;
+        form.value.roomId = res.data[0].roomId;
+      }
     } else {
       ElMessage.error("获取教室失败");
     }
@@ -367,5 +416,18 @@ const getTeacherList = () => {
       width: 200px;
     }
   }
+}
+:deep(.el-dialog__title){
+  color: #22a5d3;
+  font-weight: bold;
+  font-size: 18px;
+}
+:deep(.el-dialog--center){
+  border-radius: 10px;
+  background-color: #2a2828;
+}
+:deep(.el-form-item__label){
+  color: #fff;
+  font-size: 16px;
 }
 </style>

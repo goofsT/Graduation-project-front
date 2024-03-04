@@ -11,4 +11,7 @@
   padding:0;
   box-sizing:border-box;
 }
+body{
+  width:100%!important;
+}
 </style>
