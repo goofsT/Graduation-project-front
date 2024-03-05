@@ -13,9 +13,21 @@
           <template #label><span class="custom-tabs-label"> <i class="iconfont icon-jurassic_hat"></i><span>课程</span></span></template>
           <CourseManager/>
         </el-tab-pane>
+        <el-tab-pane label="班级">
+          <template #label><span class="custom-tabs-label"> <i class="iconfont icon-jurassic_hat"></i><span>班级</span></span></template>
+          <ClassManager/>
+        </el-tab-pane>
+        <el-tab-pane label="教师">
+          <template #label><span class="custom-tabs-label"> <i class="iconfont icon-jurassic_hat"></i><span>教师</span></span></template>
+          <TeacherManager/>
+        </el-tab-pane>
+        <el-tab-pane label="用户">
+          <template #label><span class="custom-tabs-label"> <i class="iconfont icon-jurassic_hat"></i><span>用户</span></span></template>
+          <UserManager/>
+        </el-tab-pane>
         <el-tab-pane label="事务">
           <template #label><span class="custom-tabs-label"><i class="iconfont icon-chakan1"></i><span>事务</span></span></template>
-
+          <AffairManager/>
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -24,6 +36,10 @@
 import DeviceManager from "@/components/manager/DeviceManager.vue";
 import RoomManager from "@/components/manager/RoomManager.vue";
 import CourseManager from "@/components/manager/CourseManager.vue";
+import ClassManager from "@/components/manager/ClassManager.vue";
+import TeacherManager from "@/components/manager/TeacherManager.vue";
+import UserManager from "@/components/manager/UserManager.vue";
+import AffairManager from "@/components/manager/AffairManager.vue";
 </script>
 <style scoped lang="scss">
 .manager-container{

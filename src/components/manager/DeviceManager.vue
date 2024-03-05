@@ -35,7 +35,7 @@
 <script setup lang="ts">
 import{ref,onMounted} from 'vue'
 import{getAllDevice,updateDeviceStatus,deleteDevice} from "@/api/device.ts";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 const deviceList=ref([])
 onMounted(()=>{
   getData()
@@ -63,17 +63,23 @@ const changeDeviceStatus=async (row,status)=>{
 }
 
 const handleDelete=async (row)=>{
-  try{
-    const res=await deleteDevice(row.deviceId)
-    if(res.code==200){
-      ElMessage.success('删除成功')
-      getData()
-    }else{
+  ElMessageBox.confirm(`是否删除${row.deviceName}?`, "Warning", {
+    confirmButtonText: "删除",
+    cancelButtonText: "取消",
+    type: "警告",
+  }).then(async()=>{
+    try{
+      const res=await deleteDevice(row.deviceId)
+      if(res.code==200){
+        ElMessage.success('删除成功')
+        getData()
+      }else{
+        ElMessage.error('删除失败')
+      }
+    }catch (e) {
       ElMessage.error('删除失败')
     }
-  }catch (e) {
-    ElMessage.error('删除失败')
-  }
+  })
 }
 </script>
 

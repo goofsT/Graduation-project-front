@@ -76,6 +76,7 @@
       <el-form :model="form">
         <el-form-item label="课程名" label-width="100">
           <el-input
+            placeholder="输入课程名"
             style="width: 300px"
             v-model="form.courseName"
             autocomplete="off"
@@ -85,7 +86,7 @@
           <el-select
             style="width: 300px"
             v-model="form.classId"
-            placeholder="Please select a zone"
+            placeholder="选择班级"
           >
             <el-option
               v-for="item in classList"
@@ -98,7 +99,7 @@
           <el-select
             style="width: 300px"
             v-model="form.roomId"
-            placeholder="Please select a zone"
+            placeholder="选择教室"
           >
             <el-option
               v-for="item in classRoomList"
@@ -111,7 +112,7 @@
           <el-select
             style="width: 300px"
             v-model="form.teacherId"
-            placeholder="Please select a zone"
+            placeholder="选择老师"
           >
             <el-option
               v-for="item in teacherList"
@@ -300,8 +301,7 @@ const handleDelete = async (row: any) => {
     confirmButtonText: "删除",
     cancelButtonText: "取消",
     type: "warning",
-  })
-    .then(async () => {
+  }).then(async () => {
       const res = await deleteCourse(row.courseId);
       if (res.code == 200) {
         ElMessage.success("删除成功");
