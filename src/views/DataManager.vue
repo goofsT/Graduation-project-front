@@ -9,19 +9,19 @@
           <template #label><span class="custom-tabs-label"><i class="iconfont icon-icon"></i> <span>教室</span></span></template>
           <RoomManager/>
         </el-tab-pane>
-        <el-tab-pane label="课程">
+        <el-tab-pane label="课程"  v-if="permission==='0'">
           <template #label><span class="custom-tabs-label"> <i class="iconfont icon-jurassic_hat"></i><span>课程</span></span></template>
           <CourseManager/>
         </el-tab-pane>
-        <el-tab-pane label="班级">
+        <el-tab-pane label="班级" v-if="permission==='0'" >
           <template #label><span class="custom-tabs-label"> <i class="iconfont icon-jurassic_hat"></i><span>班级</span></span></template>
           <ClassManager/>
         </el-tab-pane>
-        <el-tab-pane label="教师">
+        <el-tab-pane label="教师" v-if="permission==='0'">
           <template #label><span class="custom-tabs-label"> <i class="iconfont icon-jurassic_hat"></i><span>教师</span></span></template>
           <TeacherManager/>
         </el-tab-pane>
-        <el-tab-pane label="用户">
+        <el-tab-pane label="用户"  v-if="permission==='0'">
           <template #label><span class="custom-tabs-label"> <i class="iconfont icon-jurassic_hat"></i><span>用户</span></span></template>
           <UserManager/>
         </el-tab-pane>
@@ -40,6 +40,14 @@ import ClassManager from "@/components/manager/ClassManager.vue";
 import TeacherManager from "@/components/manager/TeacherManager.vue";
 import UserManager from "@/components/manager/UserManager.vue";
 import AffairManager from "@/components/manager/AffairManager.vue";
+import { onMounted, ref } from "vue";
+import { useUserStore } from "@/store/userStore.ts";
+const permission=ref("")
+onMounted(()=>{
+  const userInfo=useUserStore().getUser()
+  permission.value=userInfo.permission
+
+})
 </script>
 <style scoped lang="scss">
 .manager-container{

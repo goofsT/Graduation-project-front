@@ -13,11 +13,11 @@
       <el-table-column prop="realname" label="真实姓名" width="110"  />
       <el-table-column prop="telphone" label="电话"  width="150"/>
       <el-table-column prop="cardnum" label="身份证号" width="180"/>
-      <el-table-column prop="premission" label="权限"  width="100" >
+      <el-table-column prop="permission" label="权限"  width="100" >
         <template #default="scope">
-          <el-tag size="large" v-if="scope.row.premission=='0'" type="success">管理员</el-tag>
-          <el-tag size="large" v-if="scope.row.premission=='1'" type="success">普通用户</el-tag>
-          <el-tag size="large" v-if="scope.row.premission=='2'" type="success">维修人员</el-tag>
+          <el-tag size="large" v-if="scope.row.permission=='0'" type="success">管理员</el-tag>
+          <el-tag size="large" v-if="scope.row.permission=='1'" type="success">普通用户</el-tag>
+          <el-tag size="large" v-if="scope.row.permission=='2'" type="success">维修人员</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="更改操作">

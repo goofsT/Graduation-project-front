@@ -16,9 +16,9 @@
         </div>
       </div>
     </div>
-    <div class="data-manager" v-if="userInfo.premission=='0'" @click="toManager">{{btnText}}</div>
+    <div class="data-manager" v-if="!permission.includes('普通用户')" @click="toManager">{{btnText}}</div>
     <div class="info">
-      <span>{{handleUserText()}}</span>
+      <span>{{permission}}</span>
       <i class="iconfont icon-icon-dengjilikai" @click="loginOut"></i>
     </div>
   </div>
@@ -31,12 +31,13 @@ import {getWeather} from "@/api/weather.ts";
 import { ElMessage } from "element-plus";
 import router from "@/router";
 
-const userInfo=useUserStore().getUser()
 const showManager=ref(false)
+const permission=ref('')
 const btnText=ref('数据管理')
 
 onMounted(()=>{
   getWeatherInfo()
+  getUserInfo()
 })
 
 
@@ -51,15 +52,16 @@ const toManager=()=>{
   }
 }
 
-const handleUserText=()=>{
-  if(userInfo.premission=='0'){
-    return userInfo.realname+' [管理员]'
-  }else if(userInfo.premission=='1'){
-    return userInfo.realname+' [普通用户]'
-  }else if(userInfo.premission=='2'){
-    return userInfo.realname+' [维修人员]'
-  }else{
-    return userInfo.premission+' [值班人员]'
+const getUserInfo=()=>{
+  const userInfo=useUserStore().getUser()
+
+  console.log(userInfo);
+  if(userInfo.permission=='0'){
+    permission.value=userInfo.realname+' [管理员]'
+  }else if(userInfo.permission=='1'){
+    permission.value=userInfo.realname+' [普通用户]'
+  }else if(userInfo.permission=='2'){
+    permission.value=userInfo.realname+' [维修人员]'
   }
 }
 
@@ -132,7 +134,7 @@ const getWeatherInfo=async ()=>{
   }
   .data-manager{
     position:absolute;
-    right:180px;
+    right:250px;
     border:2px solid #2eb9f5;
     border-radius: 5px;
     padding:5px;
@@ -147,7 +149,7 @@ const getWeatherInfo=async ()=>{
     position: absolute;
     right: 0;
     top:50%;
-    width: 160px;
+    width: 200px;
     transform: translateY(-50%);
     display: flex;
     justify-content: space-between;

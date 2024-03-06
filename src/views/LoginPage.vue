@@ -114,6 +114,7 @@ const registerForm = reactive({
   realname:"小陈",
   telphone:"12345678911",
   cardnum:"422828200007112695",
+  permission:"1"
 });
 const showLogin = ref(true);
 const showRegister = ref(false);
