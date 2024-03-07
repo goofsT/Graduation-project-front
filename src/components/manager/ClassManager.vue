@@ -121,7 +121,6 @@ const getData=async ()=>{
   try{
     const res=await getAllClass()
     if(res.code==200){
-      console.log(res.data);
       classList.value=res.data
     }else{
       ElMessage.error('获取数据失败')

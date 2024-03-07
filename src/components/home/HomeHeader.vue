@@ -54,8 +54,6 @@ const toManager=()=>{
 
 const getUserInfo=()=>{
   const userInfo=useUserStore().getUser()
-
-  console.log(userInfo);
   if(userInfo.permission=='0'){
     permission.value=userInfo.realname+' [管理员]'
   }else if(userInfo.permission=='1'){

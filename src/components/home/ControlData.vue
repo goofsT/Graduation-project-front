@@ -15,8 +15,6 @@
     <div class="scene_control">
       <div :style="{background:showWeather?'#27a0f3':'#567988'}" @click="changeStatus('weather')">场景天气</div>
       <div :style="{background:showDevice?'#27a0f3':'#567988'}" @click="changeStatus('device')">维修设备</div>
-      <div :style="{background:showAffairs?'#27a0f3':'#567988'}" @click="changeStatus('affair')">初始位置</div>
-
     </div>
 
   </div>
@@ -60,7 +58,6 @@ const emit=defineEmits(['controlChange'])
 const changeStatus=(type)=>{
   type==='weather' && (showWeather.value=!showWeather.value)
   type==='device' && (showDevice.value=!showDevice.value)
-  type==='affair' && (showAffairs.value=!showAffairs.value)
   emit('controlChange',{showWeather:showWeather.value,showDevice:showDevice.value,showAffairs:showAffairs.value})
 }
 </script>

@@ -33,8 +33,8 @@
           textAlign: 'center',
           height: '70px',
         }"
-        max-height="680"
-        height="680px"
+        max-height="660"
+        height="660px"
         style="width: 100%; background-color: transparent"
         empty-text="暂无课程数据"
       >
@@ -297,7 +297,7 @@ const handleUpdateCourse = (row) => {
 
 //删除课程
 const handleDelete = async (row: any) => {
-  ElMessageBox.confirm(`是否删除${row.courseName}课程?`, "Warning", {
+  ElMessageBox.confirm(`是否删除${row.courseName}课程?`, "警告", {
     confirmButtonText: "删除",
     cancelButtonText: "取消",
     type: "warning",

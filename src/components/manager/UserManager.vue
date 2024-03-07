@@ -49,14 +49,12 @@ onMounted(()=>{
 const getData=()=>{
   getUserList().then((res:any)=>{
     userList.value=res.data
-    console.log(res.data);
   })
 }
 
 const changePermission=async (row,role)=>{
   try{
     const res=await setRole(row.id,role)
-    console.log(res);
     if(res.code==200){
       ElMessage.success('设置成功')
       getData()

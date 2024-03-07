@@ -18,3 +18,7 @@ export const updateDeviceStatus = (deviceId: number,deviceStatus:String) => {
 export const deleteDevice = (deviceId: number) => {
   return $api.post("/deleteDevice", { deviceId });
 };
+//根据id获取设备信息
+export const getDeviceById = (deviceId) => {
+  return $api.get(`/getDeviceById?deviceId=${deviceId}`);
+}

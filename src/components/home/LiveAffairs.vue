@@ -4,16 +4,14 @@
      <div class="card-title">{{title}}</div>
      <div class="card-list">
        <el-scrollbar height="300px" always>
-         <template v-for="item in 5">
-           <div class="card-item" v-for="thing in data">
+           <div class="card-item" v-for="affair in data" @click="handleTodayAffairClick(affair)">
              <div class="info">
-               <i class="iconfont icon-icon-fabu"></i>
-               <span class="title">{{ thing.title }}</span>
+               <i class="iconfont icon-shiwu"></i>
+               <span class="title">{{ affair.description }}</span>
              </div>
-             <div class="date">{{ thing.date }}</div>
-             <span class="status">{{ thing.status }}</span>
+             <div class="date">提交时间：{{ affair.affairTime }}</div>
            </div>
-         </template>
+         <el-empty v-if="data.length==0" description="暂无今日事务" />
        </el-scrollbar>
      </div>
      <div @click="isShow=!isShow" :class="{'control-btn':true,'iconfont':true,'icon-youzhankai':isShow,'icon-zuoshouqi':!isShow}"></div>
@@ -21,50 +19,57 @@
  </div>
 </template>
 <script setup lang="ts">
-import { ref, reactive,watch } from 'vue'
+import { ref,watch,onMounted } from 'vue'
+import {getTodyAffairList} from "@/api/affair.ts";
+import{getDeviceById} from "@/api/device.ts";
+import {getClassRoomById} from "@/api/ClassRoom.ts";
+import{useCurrentRoom} from "@/store/currentRoom.ts";
+import {useCurrentDevice} from "@/store/currentDevice.ts";
+import { ElMessage } from "element-plus";
 //父组件数据
 const props = defineProps(['name'])
 const emit= defineEmits(['updateShow'])
-const title=ref('实时事务')
+const title=ref('今日事务')
 //子组件数据
-const data = reactive([
-  {
-    title: '1号楼3楼消防栓损坏',
-    date: '2023-9-8',
-    status: '待处理',
-    urgency: '紧急事务',
-  },
-  {
-    title: '2号楼3楼17号教室待清洁',
-    date: '2023-9-8',
-    status: '已处理',
-    urgency: '一般事务',
-  },
-  {
-    title: '2号楼1楼发生聚众情况',
-    date: '2023-9-8',
-    status: '待处理',
-    urgency: '紧急事务',
-  },
-  {
-    title: '2号楼2楼监控损坏',
-    date: '2023-9-8',
-    status: '待处理',
-    urgency: '通知',
-  },
-  {
-    title: '1号楼1楼召开教务会议',
-    date: '2023-9-8',
-    status: '已处理',
-    urgency: '通知',
-  },
-])
+const data = ref([])
 
 //控制显示隐藏
 const isShow = ref(true)
-watch(isShow,(newVal)=>{
-emit('updateShow',{name:props.name,isShow:newVal})
+watch(isShow,(newVal)=>{emit('updateShow',{name:props.name,isShow:newVal})})
+
+
+onMounted(()=>{
+  getData()
 })
+
+
+//点击事务场景变化
+const handleTodayAffairClick=async (affair)=>{
+  console.log(affair);
+  if(affair.affairType==='0'){
+    const res=await getDeviceById(affair.affairTypeId)
+    res.code===200 && useCurrentDevice().setDeviceInfo(res.data)
+  }else if(affair.affairType==='1'){
+    const res=await getClassRoomById(affair.affairTypeId)
+    res.code===200 && useCurrentRoom().setRoomInfo(res.data)
+  }
+}
+
+const getData=()=>{
+  getTodyAffairList().then((res)=>{
+    if(res.code===200){
+      if(res.data.length>0){
+        data.value=res.data.filter(item=>{
+          return item.description.includes('维修')
+        })
+      }else{
+        data.value=[]
+      }
+    }else{
+      ElMessage.warning('获取今日事务失败')
+    }
+  })
+}
 
 </script>
 <style scoped lang="scss">
@@ -98,20 +103,29 @@ emit('updateShow',{name:props.name,isShow:newVal})
       .card-item {
         border: 1px solid #38393a;
         box-shadow: 0 0 5px #636669;
-        height:45px;
+        height:120px;
         border-right: 5px;
-        padding: 5px 10px;
+        padding: 5px;
         margin: 5px 0;
         display: flex;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
         flex-wrap: wrap;
         .info {
           width: 100%;
           display: flex;
+          flex-wrap: wrap;
           align-items: center;
+          justify-content: center;
+        .title {
+            margin-left: 10px;
+            font-size: 15px;
+            color: #fff;
+          }
 
           i {
+            width:100%;
+            text-align: center;
             font-size: 28px;
             color: #0c8fe9;
           }
@@ -119,7 +133,7 @@ emit('updateShow',{name:props.name,isShow:newVal})
         .date {
           margin-top: 5px;
           font-size: 12px;
-          color: #fff;
+          color: #38d5ea;
         }
         .status {
           font-size: 12px;

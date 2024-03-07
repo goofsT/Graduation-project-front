@@ -27,3 +27,8 @@ export const getClassRoomByFloor = (building: string, floor: string) => {
 export const updateClassRoomStatus = (roomId: number, status: String) => {
   return $api.post("/updateClassRoomStatus", { roomId, status });
 };
+
+
+export const getClassRoomById = (roomId) => {
+  return $api.get(`/getClassRoomById?roomId=${roomId}`);
+}

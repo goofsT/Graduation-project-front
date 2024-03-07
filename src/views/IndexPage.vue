@@ -18,20 +18,12 @@
             <template #label><span class="custom-tabs-label"><i class="iconfont icon-kongjiaoshichaxun-01"></i><span>实时教室</span></span></template>
             <ClassManager/>
           </el-tab-pane>
-          <el-tab-pane v-if="userType=='0'" label="维修事务" name="third">
-            <template #label><span class="custom-tabs-label"><i class="iconfont icon-icon-yonghu"></i><span>维修事务</span></span></template>
-          </el-tab-pane>
-          <el-tab-pane v-if="userType=='2'" label="维修事务" name="third">
-            <template #label><span class="custom-tabs-label"><i class="iconfont icon-icon-yonghu"></i><span>维修事务</span></span></template>
-            <RepairAffairs/>
-          </el-tab-pane>
-
         </el-tabs>
       </div>
       <div class="center" :style="{}">
         <router-view />
       </div>
-      <div :style="!showLiveBlock?'right:-290px':''" class="right-box-live">
+      <div v-show="showLiveBox" :style="!showLiveBlock?'right:-290px':''" class="right-box-live">
         <LiveAffairs @updateShow="showLiveUpdate" name="live"/>
       </div>
     </div>
@@ -39,26 +31,41 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref,watch } from "vue";
 import LiveAffairs from "@/components/home/LiveAffairs.vue";
 import HomeHeader from "@/components/home/HomeHeader.vue";
 import LiveData from "@/components/home/LiveData.vue";
 import ClassManager from "@/components/home/ClassManager.vue";
 import DeviceStatus from "@/components/home/DeviceStatus.vue";
-import RepairAffairs from "@/components/home/RepairAffairs.vue";
+import { useRoute } from "vue-router";
+
 const activeName = ref("first");
 const userType=ref('0')
 onMounted(() => {
   userType.value=JSON.parse(localStorage.getItem("userInfo")!).premission
+  handleWatch()
 });
 const handleTabClick = () => {};
 
 
 //控制场景右侧弹出框的显示与隐藏
-const showLiveBlock=ref(false)
+const showLiveBlock=ref(true)
 const showLiveUpdate=(obj:any)=>{
     showLiveBlock.value=obj.isShow
 }
+
+//监听当前路由变化
+const showLiveBox=ref(true)
+const handleWatch=()=>{
+  const route = useRoute();
+  watch(() => route.path, (newPath) => {
+    newPath==='/manage' && (showLiveBox.value=false)
+    newPath==='/home' && (showLiveBox.value=true)
+  });
+
+}
+
+
 
 
 
