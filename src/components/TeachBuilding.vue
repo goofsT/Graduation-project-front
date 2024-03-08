@@ -565,7 +565,7 @@ export default {
        <div style="position:absolute">
           <div class="iconfont ${icon}" style="font-size: 3px;color:${color}"></div>
           <div style="font-size: 2.5px">设备名：${name}</div>
-          <div style="font-size: 2.5px">状态：${status}</div>
+          <div style="font-size: 2.5px;color:${color}">状态：${status}</div>
        </div>
       `
       card.style.fontSize='1px'
@@ -588,40 +588,82 @@ export default {
     setRoom(position,name,data){
       this.roomCard && this.scene.remove(this.roomCard)
       const card = document.createElement('div');
-      let height
+      let height,width
       if(data.status==='0'){
-        card.innerHTML=`
-       <div style="position:absolute;padding:1px;font-size: 2.5px;color:#0be8e1">
-          <div style="color:#10c710;position:absolute;right:-8px;font-size: 5px" class="iconfont icon-kongxianzhong" ></div>
-          <div>教室：${name}</div>
-          <div>状态: 空闲中</div>
-       </div>
-      `
-        height='11px'
+        height='15px'
+        if(data.soonCourse){
+          card.innerHTML=`
+          <div style="position:absolute;padding:1px;font-size: 2.5px;color:#0be8e1">
+            <div style="color:#10c710;position:absolute;right:-8px;font-size: 5px" class="iconfont icon-kongxianzhong" ></div>
+            <div>教室：${name}</div>
+            <div>当前状态: 空闲中</div>
+            <div style="text-align: center;color:#eceff1;margin-left:8px;font-weight: bold">即将开始</div>
+            <div>老师：${data.soonCourse.teacher.teacherName}</div>
+            <div>课程：${data.soonCourse.courseName} </div>
+            <div>时间：${data.soonCourse.courseTimeStart.slice(11, 16)}-${data.soonCourse.courseTimeEnd.slice(11, 16)}</div>
+            <div>班级: ${data.soonCourse.sclass.className}</div>
+        </div>`
+          height='30px'
+        }else{
+          card.innerHTML=`
+          <div style="position:absolute;padding:1px;font-size: 2.5px;color:#0be8e1">
+            <div style="color:#10c710;position:absolute;right:-8px;font-size: 5px" class="iconfont icon-kongxianzhong" ></div>
+            <div>教室：${name}</div>
+            <div>状态: 空闲中</div>
+            <div>下节课状态:空闲</div>
+        </div>`
+        }
+        width='35px'
       }else if(data.status==='1'){
-        card.innerHTML=`
-       <div style="position:absolute;padding:1px;font-size: 2.5px;color:#0be8e1">
-          <div style="font-size: 5px;color:#0e91ee;position:absolute;right:-8px" class="iconfont icon-shangkezhong1"></div>
-          <div>教室：${name}</div>
-          <div>老师：${data.course.teacher.teacherName}</div>
-          <div>课程：${data.course.courseName} </div>
-          <div>时间：${data.course.courseTimeStart.slice(11, 16)}-${data.course.courseTimeEnd.slice(11, 16)}</div>
-          <div>班级: ${ data.course.sclass.className}</div>
-       </div>
-      `
-        height='25px'
+        if(data.soonCourse){
+          card.innerHTML=`
+          <div style="position:absolute;padding:1px;font-size: 2.5px;color:#0be8e1;display: flex;justify-content: space-between">
+            <div style="font-size: 5px;color:#0e91ee;position:absolute;right:-8px" class="iconfont icon-shangkezhong1"></div>
+            <div>
+              <div style="text-align: center;color:#eceff1;margin-left:8px;font-weight: bold">当前课程</div>
+              <div>教室：${name}</div>
+              <div>老师：${data.course.teacher.teacherName}</div>
+              <div>课程：${data.course.courseName} </div>
+              <div>时间：${data.course.courseTimeStart.slice(11, 16)}-${data.course.courseTimeEnd.slice(11, 16)}</div>
+              <div>班级: ${ data.course.sclass.className}</div>
+            </div>
+            <div style="margin-left:3px">
+              <div style="text-align: center;color:#eceff1;margin-left:8px;font-weight: bold">即将开始</div>
+              <div>教室：${name}</div>
+              <div>老师：${data.soonCourse.teacher.teacherName}</div>
+              <div>课程：${data.soonCourse.courseName} </div>
+              <div>时间：${data.soonCourse.courseTimeStart.slice(11, 16)}-${data.soonCourse.courseTimeEnd.slice(11, 16)}</div>
+              <div>班级: ${data.soonCourse.sclass.className}</div>
+            </div>
+         </div> `
+          height='28px'
+          width='60px'
+        }else{
+          card.innerHTML=`
+          <div style="position:absolute;padding:1px;font-size: 2.5px;color:#0be8e1">
+            <div style="font-size: 5px;color:#0e91ee;position:absolute;right:-8px" class="iconfont icon-shangkezhong1"></div>
+            <div>教室：${name}</div>
+            <div>老师：${data.course.teacher.teacherName}</div>
+            <div>课程：${data.course.courseName} </div>
+            <div>时间：${data.course.courseTimeStart.slice(11, 16)}-${data.course.courseTimeEnd.slice(11, 16)}</div>
+            <div>班级: ${ data.course.sclass.className}</div>
+            <div>下节课状态:空闲</div>
+         </div> `
+          height='28px'
+          width='35px'
+        }
       }else{
         card.innerHTML=`
        <div style="position:absolute;padding:1px;font-size: 2.5px;color:#0be8e1">
           <div style="color:red;position:absolute;right:-8px;font-size: 5px" class="iconfont icon-weixiuzhong" ></div>
           <div>教室：${name}</div>
-          <div>状态：维修中</div>
+          <div style="color:red">状态：维修中</div>
        </div>
       `
         height='11px'
       }
       card.style.fontSize='1px'
-      card.style.width='35px'
+      card.style.width=width
       card.style.height=height
       card.style.pointerEvents='none'
       card.style.background='url(images/card.png) no-repeat center center / 100% 100%'
@@ -640,6 +682,9 @@ export default {
     disposeCard(){
       this.card && this.scene.remove(this.card)
       this.roomCard && this.scene.remove(this.roomCard)
+      this.outlinePass.selectedObjects=[]
+      currentRoom.room=null
+      currentDevice.device=null
       new TWEEN.Tween(this.camera.position)
         .to({x:18,y:8,z:0},2000)
         .easing(TWEEN.Easing.Quadratic.Out)
@@ -648,21 +693,25 @@ export default {
       this.control.update()
     },
     setDeviceCard(device){
+      if(!device)return
       if(device.deviceType==='0'){
         this.lights.forEach((light)=>{
           if(light.name===device.modelName){
+            this.outlinePass.selectedObjects=[light.mesh]
             this.setCard(light.mesh.position,device.deviceName,device)
           }
         })
       }else if(device.deviceType==='1'){
         this.doors.forEach((door)=>{
           if(door.name===device.modelName){
+            this.outlinePass.selectedObjects=[door.mesh]
             this.setCard(door.mesh.position,device.deviceName,device)
           }
         })
       }else{
         this.fireHydrant.forEach((fire)=>{
           if(fire.name===device.modelName){
+            this.outlinePass.selectedObjects=[fire.mesh]
             this.setCard(fire.mesh.position,device.deviceName,device)
           }
         })
@@ -670,7 +719,7 @@ export default {
     },
     setRoomCard(room){
       this.doors.forEach(door=>{
-        if(door.name===room.positionModel){
+        if(room && door.name===room.positionModel){
           this.setRoom(door.mesh.position,room.roomName,room)
         }
       })

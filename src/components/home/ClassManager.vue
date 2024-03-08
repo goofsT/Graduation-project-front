@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
-import {getClassRoomByFloor} from '@/api/ClassRoom.ts'
+import {getClassRoomByFloor,getRoomSoonCourse} from '@/api/ClassRoom.ts'
 import {useCurrentRoom} from "@/store/currentRoom.ts";
 import { ElMessage } from "element-plus";
 const currentRoom=useCurrentRoom()
@@ -78,7 +78,14 @@ onBeforeUnmount(()=>{
 })
 
 const roomClick=(room)=>{
-  currentRoom.setRoomInfo(room)
+  getRoomSoonCourse(room.roomId).then((res)=>{
+    if(res.code===200){
+      room.soonCourse=res.data
+    }else{
+      room.soonCourse=null
+    }
+    currentRoom.setRoomInfo(room)
+  })
 }
 
 const handleSelect = (key: string, keyPath: string[]) => {

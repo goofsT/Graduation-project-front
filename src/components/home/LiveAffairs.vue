@@ -45,7 +45,6 @@ onMounted(()=>{
 
 //点击事务场景变化
 const handleTodayAffairClick=async (affair)=>{
-  console.log(affair);
   if(affair.affairType==='0'){
     const res=await getDeviceById(affair.affairTypeId)
     res.code===200 && useCurrentDevice().setDeviceInfo(res.data)
@@ -61,6 +60,8 @@ const getData=()=>{
       if(res.data.length>0){
         data.value=res.data.filter(item=>{
           return item.description.includes('维修')
+        }).sort((a,b)=>{
+          return new Date(b.affairTime).getTime()-new Date(a.affairTime).getTime()
         })
       }else{
         data.value=[]

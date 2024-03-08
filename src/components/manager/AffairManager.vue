@@ -1,5 +1,20 @@
 <template>
-  <el-scrollbar height="740px">
+  <div class="affair-top">
+    <el-button type="primary" size="large" @click="getData">今日事务</el-button>
+    <div class="affair-title">{{affairTitle}}</div>
+    <div>
+      <el-date-picker
+        v-model="searchDate"
+        type="date"
+        value-format="YYYY-MM-DD"
+        format="YYYY-MM-DD"
+        placeholder="选择日期查询"
+        size="large"
+      />
+      <el-button type="primary" size="large" @click="getDataByDate">查询</el-button>
+    </div>
+  </div>
+  <el-scrollbar height="700px" v-loading="isLoading" element-loading-text="查询中" element-loading-background="#000">
     <el-descriptions class="description-box" title="With border" :column="3" size="large" border v-for="affair in affairList">
       <el-descriptions-item>
         <template #label><div class="cell-item"><i class="iconfont icon-shiwu"></i>事务Id</div></template>
@@ -37,11 +52,15 @@
 </template>
 
 <script setup lang="ts">
-import {getAllAffairs,deleteAffair} from "@/api/affair.ts";
+import {getAllAffairs,deleteAffair,getAffairByDate,getTodyAffairList} from "@/api/affair.ts";
 import { onBeforeUnmount, onMounted, ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 const affairList=ref([])
 const timer=ref(null)
+const searchDate=ref('')
+const showTodayAffair=ref(true)
+const affairTitle=ref('今日事务')
+const isLoading=ref(false)
 onMounted(()=>{
   getData()
   timer.value=setInterval(()=>{
@@ -75,7 +94,7 @@ const handleDelete=(id)=>{
       const res = await deleteAffair(id);
       if (res.code == 200) {
         ElMessage.success("删除成功");
-        getData();
+        showTodayAffair.value?getData():getDataByDate()
       } else {
         ElMessage.warning("删除失败");
       }
@@ -122,9 +141,14 @@ const handleAffairType=(type)=>{
   }
 }
 
+// 获取今日事务
 const getData=async ()=>{
   try{
-    const res=await getAllAffairs()
+    isLoading.value=true
+    showTodayAffair.value=true
+    affairTitle.value='今日事务'
+    const res=await getTodyAffairList()
+    isLoading.value=false
     if(res.code==200){
       affairList.value=res.data
       affairList.value.sort((a,b)=>{
@@ -137,9 +161,39 @@ const getData=async ()=>{
     ElMessage.warning("获取事务失败")
   }
 }
+
+// 根据日期查询事务
+const getDataByDate=async ()=>{
+  if(searchDate.value){
+    isLoading.value=true
+    showTodayAffair.value=false
+    const res=await getAffairByDate(searchDate.value)
+    console.log(res);
+    isLoading.value=false
+    if(res.code==200){
+      affairTitle.value=`${searchDate.value}事务`
+      affairList.value=res.data
+      affairList.value.sort((a,b)=>{
+        return new Date(b.affairTime).getTime()-new Date(a.affairTime).getTime()
+      })
+    }else{
+      ElMessage.warning('获取事务失败')
+    }
+  }
+}
 </script>
 
 <style scoped lang="scss">
+.affair-top{
+  display: flex;
+  justify-content: space-between;
+  .affair-title{
+    font-size: 25px;
+    font-weight: bold;
+    margin: 0 20px;
+    color: #2eb9f5;
+  }
+}
 
 .description-box{
   :deep(.el-descriptions__body){
@@ -151,5 +205,10 @@ const getData=async ()=>{
       color: #6bd6e0;
     }
   }
+}
+:deep(.el-scrollbar__thumb) {
+  background: #0680e5 !important;
+  //透明度
+  opacity: 1 !important;
 }
 </style>

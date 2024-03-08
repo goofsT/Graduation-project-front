@@ -22,3 +22,7 @@ export const deleteDevice = (deviceId: number) => {
 export const getDeviceById = (deviceId) => {
   return $api.get(`/getDeviceById?deviceId=${deviceId}`);
 }
+
+export const getDeviceNumInfo=()=>{
+  return $api.get("/getDeviceNumInfo");
+}

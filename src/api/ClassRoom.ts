@@ -28,7 +28,20 @@ export const updateClassRoomStatus = (roomId: number, status: String) => {
   return $api.post("/updateClassRoomStatus", { roomId, status });
 };
 
-
+//根据教室id获取教室信息
 export const getClassRoomById = (roomId) => {
   return $api.get(`/getClassRoomById?roomId=${roomId}`);
+}
+//获取教室使用情况
+export const getRoomNumInfo=()=>{
+  return $api.get("/getRoomNumInfo");
+}
+
+//获取教室即将上课的课程
+export const getRoomSoonCourse=(roomId)=>{
+  return $api.get(`/getRoomSoonCourse?roomId=${roomId}`);
+}
+
+export const getStudentNumToday=()=>{
+  return $api.get("/getTodayStudentNum");
 }

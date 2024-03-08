@@ -1,14 +1,12 @@
 <template>
   <div class="container">
     <div class="data-item" v-for="item in data" :key="item.title">
-      <div>{{ item.title }}</div>
+      <div style="font-size: 18px">{{ item.title }}</div>
       <div>
         <span>{{ item.num }}</span>
-        <span>{{ item.sate }}</span>
       </div>
       <div>
-        <span>{{ item.rate }}</span>
-        <span>{{ item.rateNum }}</span>
+        <span style="color:#07f3c8">{{ item.rateNum }}</span>
         <span :class="item.icon"></span>
       </div>
     </div>
@@ -20,31 +18,28 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { useDeviceStore } from "@/store/deviceStore.ts";
+import { ref, reactive, onMounted } from "vue";
+import{getAffairNumInfo} from "@/api/affair.ts";
+import{getRoomNumInfo} from "@/api/classRoom.ts";
+import{getDeviceNumInfo} from "@/api/device.ts";
+import { ElMessage } from "element-plus";
 const data = reactive([
   {
-    title: '设备接入数量',
+    title: '设备数量',
     num: '265/800',
-    sate: '目标',
-    rate: '设备完好率',
     rateNum: '90%',
     icon: 'iconfont icon-icon-chakan',
   },
   {
     title: '教室使用',
     num: '265/800',
-    sate: '当前',
-    rate: '使用率',
     rateNum: '0.88',
     icon: 'iconfont icon-icon-dengjilikai',
   },
   {
     title: '事务处理',
     num: '265/800',
-    sate: '当前',
-    rate: '处理进度',
-    rateNum: '50%',
+    rateNum: '',
     icon: 'iconfont icon-icon-shenhe',
   },
 ])
@@ -60,6 +55,46 @@ const changeStatus=(type)=>{
   type==='device' && (showDevice.value=!showDevice.value)
   emit('controlChange',{showWeather:showWeather.value,showDevice:showDevice.value,showAffairs:showAffairs.value})
 }
+
+onMounted(()=>{
+  getDeviceInfo()
+  getRoomInfo()
+  getAffairInfo()
+})
+
+const getDeviceInfo=()=>{
+  getDeviceNumInfo().then((res)=>{
+    if(res.code===200){
+      data[0].num=res.data.repairNum+'维修'+'/'+res.data.deviceNum+'总数'
+      data[0].rateNum='维修率'+((res.data.repairNum/res.data.deviceNum)*100).toFixed(2)+'%'
+    }else{
+      ElMessage.warning("获取设备数量失败")
+    }
+  })
+}
+
+const getRoomInfo=()=>{
+  getRoomNumInfo().then((res)=>{
+    if(res.code===200){
+      data[1].num=res.data.freeRoomNum+'空闲'+'/'+res.data.roomNum+'总数'
+      data[1].rateNum='空闲率'+((res.data.freeRoomNum/res.data.roomNum)*100).toFixed(2)+'%'
+    }else{
+     ElMessage.warning("获取教室数量失败")
+    }
+  })
+}
+
+const getAffairInfo=()=>{
+  getAffairNumInfo().then((res)=>{
+    if(res.code===200){
+      data[2].num=res.data.todayNum+'今日'+'/'+res.data.weekNum+'本周'
+      data[2].rateNum='今日占比'+((res.data.todayNum/res.data.weekNum)*100).toFixed(2)+'%'
+    }else{
+      ElMessage.warning("获取事务数量失败")
+    }
+  })
+}
+
 </script>
 <style scoped lang="scss">
 .container {
