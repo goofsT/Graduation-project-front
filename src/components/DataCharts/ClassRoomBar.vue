@@ -137,9 +137,9 @@ const getOption=(title:any,data:any)=>{
           }
         },
         data: [
-          { value: data.free, name: '空闲' },
-          { value: data.use, name: '使用中' },
-          { value: data.repair, name: '维修' },
+          { value: data.free, name: '空闲',itemStyle: { color: '#89d23c' }},
+          { value: data.use, name: '使用中',itemStyle: { color: '#3ba6ea' } },
+          { value: data.repair, name: '维修',itemStyle: { color: '#e30f0f' } },
           {
             value: data.free+data.use+data.repair,
             itemStyle: {

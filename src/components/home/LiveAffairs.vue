@@ -7,7 +7,7 @@
            <div class="card-item" v-for="affair in data" @click="handleTodayAffairClick(affair)">
              <div class="info">
                <i class="iconfont icon-shiwu"></i>
-               <span class="title">{{ affair.description }}</span>
+               <span class="title" :style="{color:getDescriptionTextColor(affair.description)}">{{ affair.description }}</span>
              </div>
              <div class="date">提交时间：{{ affair.affairTime }}</div>
            </div>
@@ -19,7 +19,7 @@
  </div>
 </template>
 <script setup lang="ts">
-import { ref,watch,onMounted } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount } from "vue";
 import {getTodyAffairList} from "@/api/affair.ts";
 import{getDeviceById} from "@/api/device.ts";
 import {getClassRoomById} from "@/api/ClassRoom.ts";
@@ -29,6 +29,7 @@ import { ElMessage } from "element-plus";
 //父组件数据
 const props = defineProps(['name'])
 const emit= defineEmits(['updateShow'])
+const timer=ref(null)
 const title=ref('今日事务')
 //子组件数据
 const data = ref([])
@@ -40,8 +41,26 @@ watch(isShow,(newVal)=>{emit('updateShow',{name:props.name,isShow:newVal})})
 
 onMounted(()=>{
   getData()
+  timer.value=setInterval(()=>{
+    getData()
+  },6000)
 })
 
+onBeforeUnmount(()=>{
+  clearInterval(timer)
+})
+
+
+const getDescriptionTextColor=(text)=>{
+  if(text.includes('需要维修')){
+    return '#f50d0d'
+  }else if(text.includes('维修完成')){
+    return '#1cda25'
+  }else if(text.includes('更换教室')){
+    return '#0cb1ee'
+
+  }
+}
 
 //点击事务场景变化
 const handleTodayAffairClick=async (affair)=>{

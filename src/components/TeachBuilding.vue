@@ -71,6 +71,8 @@ export default {
       showRepairDevice:false,//是否显示维修设备
       showDeviceCard:false,//是否显示设备卡片
       iconGroup:null,//图标group
+      weatherFog:null,
+      normalFog:null//正常
     }
   },
   watch:{
@@ -108,6 +110,7 @@ export default {
       this.scene = new THREE.Scene()
       this.iconGroup=new THREE.Group();
       this.scene.fog=new THREE.Fog('#6c6969',0.015,500)
+      this.normalFog=new THREE.Fog('#6c6969',0.015,500)
       //添加天空盒子纹理
       const skybox = new THREE.CubeTextureLoader()
         .setPath( '/textures/Park3Med/' )
@@ -246,6 +249,7 @@ export default {
       }
     },
     renderWeather(){
+      this.scene.fog=this.showWeather?this.weatherFog:this.normalFog
       if(this.showWeather && this.weatherParticles){
         //判断场景中是否有雪花
         this.scene.add(this.weatherParticles)
@@ -258,6 +262,7 @@ export default {
         //重新设置位置属性
         this.weatherGeometry.setAttribute('position',new THREE.Float32BufferAttribute(this.weatherVertices,3))
       }else{
+        this.scene.fog=this.normalWeather
         this.weatherParticles && this.scene.remove(this.weatherParticles)
       }
     },
@@ -455,6 +460,12 @@ export default {
       }
     },
     setWeather(weather){
+      if(weather.type.includes("雾")||weather.type.includes("霾")){
+        this.weatherFog=new THREE.FogExp2(0xefd1b5,0.02)
+      }else{
+        this.weatherFog=this.normalFog
+      }
+
       this.weatherTexture=new THREE.TextureLoader().load(this.getWeatherTextureUrl(weather))
       this.weatherGeometry = new THREE.BufferGeometry()
       this.weatherVertices = []

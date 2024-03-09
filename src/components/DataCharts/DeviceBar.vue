@@ -121,10 +121,11 @@ const setChart=async()=>{
           }
         },
         //柱子上方的数字
+        itemStyle: { color: '#29dc15' },
         label: {
           show: true,
           position: 'top',
-          color: '#30b7e0'
+          color: '#14d740'
         },
         data: [deviceInfo[0].openNum, deviceInfo[1].openNum, deviceInfo[2].openNum]
       },
@@ -136,6 +137,7 @@ const setChart=async()=>{
             return String(value) ;
           }
         },
+        itemStyle: { color: '#dcd115' },
         label: {
           show: true,
           position: 'top',
@@ -151,6 +153,7 @@ const setChart=async()=>{
             return String(value) ;
           }
         },
+        itemStyle: { color: '#e30f0f' },
         label: {
           show: true,
           position: 'top',

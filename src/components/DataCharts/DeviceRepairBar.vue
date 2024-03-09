@@ -17,7 +17,7 @@
 import { getRepairDevice } from "@/api/device.ts";
 import { reactive, onMounted, onBeforeUnmount, ref } from "vue";
 import { ElMessage } from "element-plus";
-const repairData = reactive([])
+const repairData = ref([])
 const timer = ref<any>(null)
 onMounted(()=>{
   getData()
@@ -31,12 +31,7 @@ const getData = async () => {
   try{
     const res = await getRepairDevice()
     if (res.code === 200) {
-      if(res.data.length===0){
-        repairData.length = 0
-        Object.keys(repairData).forEach(key => delete repairData[key]);
-        return
-      }
-      Object.assign(repairData, res.data);
+      repairData.value=res.data
     }else{
       ElMessage.warning('维修设备数据获取失败');
     }

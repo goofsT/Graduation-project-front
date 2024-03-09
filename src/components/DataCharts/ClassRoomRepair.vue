@@ -18,11 +18,11 @@ import { onBeforeUnmount, ref } from "vue";
 import { getRepairClassRoom } from "@/api/ClassRoom.ts";
 import { reactive, onMounted } from 'vue'
 import { ElMessage } from "element-plus";
-const repairData = reactive([])
+const repairData = ref([])
 const timer = ref<any>(null)
 onMounted(()=>{
   getData()
-  setInterval(()=>{getData()},60000)
+  setInterval(()=>{getData()},3000)
 })
 onBeforeUnmount(()=>{
   timer.value && clearInterval(timer.value)
@@ -31,12 +31,7 @@ onBeforeUnmount(()=>{
 const getData = async () => {
   const res = await getRepairClassRoom()
   if (res.code === 200) {
-    if(res.data.length===0){
-      repairData.length = 0
-      Object.keys(repairData).forEach(key => delete repairData[key]);
-      return
-    }
-    Object.assign(repairData, res.data);
+    repairData.value=res.data
   }else{
     ElMessage.warning('维修教室数据获取失败');
   }
@@ -65,7 +60,7 @@ const getData = async () => {
         color: #fff;
       }
       .device-item-status{
-        color: #fff;
+        color: #ef2121;
       }
     }
     .device-item-name{
