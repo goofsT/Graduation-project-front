@@ -76,8 +76,8 @@ const getDeviceInfo=()=>{
 const getRoomInfo=()=>{
   getRoomNumInfo().then((res)=>{
     if(res.code===200){
-      data[1].num=res.data.freeRoomNum+'空闲'+'/'+res.data.roomNum+'总数'
-      data[1].rateNum='空闲率'+((res.data.freeRoomNum/res.data.roomNum)*100).toFixed(2)+'%'
+      data[1].num=res.data.freeRoomNum+'使用中'+'/'+res.data.roomNum+'总数'
+      data[1].rateNum='使用率'+((res.data.freeRoomNum/res.data.roomNum)*100).toFixed(2)+'%'
     }else{
      ElMessage.warning("获取教室数量失败")
     }

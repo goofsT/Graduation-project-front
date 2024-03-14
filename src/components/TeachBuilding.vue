@@ -567,37 +567,39 @@ export default {
       this.scene.add(this.title1);
     },
     //设置卡片
-    setCard(position,name,data){
+    setCard(p,name,data){
+      const position=JSON.parse(JSON.stringify(p))//深拷贝一份，防止移动模型位置
       if(name.includes('灯')){position.y-=0.1}
+      console.log(position.y);
       const {icon,status,color}=this.getDeviceInfo(data)
       this.card && this.scene.remove(this.card)
+      this.roomCard && this.scene.remove(this.roomCard)
       const card = document.createElement('div');
       card.innerHTML=`
-       <div style="position:absolute">
-          <div class="iconfont ${icon}" style="font-size: 3px;color:${color}"></div>
-          <div style="font-size: 2.5px">设备名：${name}</div>
-          <div style="font-size: 2.5px;color:${color}">状态：${status}</div>
+       <div style="position:absolute;left:7px;top:8px;display: flex">
+          <div class="iconfont ${icon}" style="font-size: 5px;color:${color};background-color: rgba(11,25,33,0.5);border-radius: 50%;"></div>
+          <div style="font-size: 2px;margin-left: 3px;margin-top:1px">${name}</div>
        </div>
       `
       card.style.fontSize='1px'
       card.style.width='35px'
       card.style.height='15px'
       card.style.pointerEvents='none'
-      card.style.background='url(images/card.png) no-repeat center center / 100% 100%'
+      card.style.background='url(images/device_box.png) no-repeat center center / 100% 100%'
       this.card = new CSS3DObject(card);
       this.card.scale.set(0.01,0.01,0.01)
       this.card.position.set(position.x,position.y,position.z);
       this.scene.add(this.card);
       this.animateCamera(data.modelPosition)
-      if (this.disposeCardTimer) {
-        clearTimeout(this.disposeCardTimer);
-      }
+      this.disposeCardTimer && clearTimeout(this.disposeCardTimer);
+      this.disposeRoomCardTimer && clearTimeout(this.disposeRoomCardTimer);
       this.disposeCardTimer=setTimeout(()=>{
         this.disposeCard()
       },10000)
     },
     setRoom(position,name,data){
       this.roomCard && this.scene.remove(this.roomCard)
+      this.card && this.scene.remove(this.card)
       const card = document.createElement('div');
       let height,width
       if(data.status==='0'){
@@ -605,7 +607,7 @@ export default {
         if(data.soonCourse){
           card.innerHTML=`
           <div style="position:absolute;padding:1px;font-size: 2.5px;color:#0be8e1">
-            <div style="color:#10c710;position:absolute;right:-8px;font-size: 5px" class="iconfont icon-kongxianzhong" ></div>
+            <div style="color:#10c710;position:absolute;right:-6px;font-size: 5px" class="iconfont icon-kongxianzhong" ></div>
             <div>教室：${name}</div>
             <div>当前状态: 空闲中</div>
             <div style="text-align: center;color:#eceff1;margin-left:8px;font-weight: bold">即将开始</div>
@@ -614,11 +616,11 @@ export default {
             <div>时间：${data.soonCourse.courseTimeStart.slice(11, 16)}-${data.soonCourse.courseTimeEnd.slice(11, 16)}</div>
             <div>班级: ${data.soonCourse.sclass.className}</div>
         </div>`
-          height='30px'
+          height='32px'
         }else{
           card.innerHTML=`
           <div style="position:absolute;padding:1px;font-size: 2.5px;color:#0be8e1">
-            <div style="color:#10c710;position:absolute;right:-8px;font-size: 5px" class="iconfont icon-kongxianzhong" ></div>
+            <div style="color:#10c710;position:absolute;right:-7px;font-size: 5px" class="iconfont icon-kongxianzhong" ></div>
             <div>教室：${name}</div>
             <div>状态: 空闲中</div>
             <div>下节课状态:空闲</div>
@@ -629,9 +631,9 @@ export default {
         if(data.soonCourse){
           card.innerHTML=`
           <div style="position:absolute;padding:1px;font-size: 2.5px;color:#0be8e1;display: flex;justify-content: space-between">
-            <div style="font-size: 5px;color:#0e91ee;position:absolute;right:-8px" class="iconfont icon-shangkezhong1"></div>
-            <div>
-              <div style="text-align: center;color:#eceff1;margin-left:8px;font-weight: bold">当前课程</div>
+            <div style="font-size: 5px;color:#0e91ee;position:absolute;right:-5px" class="iconfont icon-shangkezhong1"></div>
+            <div style="margin-left:2px;">
+              <div style="text-align: center;color:#eceff1;font-weight: bold">当前课程</div>
               <div>教室：${name}</div>
               <div>老师：${data.course.teacher.teacherName}</div>
               <div>课程：${data.course.courseName} </div>
@@ -647,7 +649,7 @@ export default {
               <div>班级: ${data.soonCourse.sclass.className}</div>
             </div>
          </div> `
-          height='28px'
+          height='29px'
           width='60px'
         }else{
           card.innerHTML=`
@@ -661,31 +663,32 @@ export default {
             <div>下节课状态:空闲</div>
          </div> `
           height='28px'
-          width='35px'
+          width='36px'
         }
       }else{
         card.innerHTML=`
        <div style="position:absolute;padding:1px;font-size: 2.5px;color:#0be8e1">
-          <div style="color:red;position:absolute;right:-8px;font-size: 5px" class="iconfont icon-weixiuzhong" ></div>
+          <div style="color:red;position:absolute;right:-7px;font-size: 5px" class="iconfont icon-weixiuzhong" ></div>
           <div>教室：${name}</div>
           <div style="color:red">状态：维修中</div>
        </div>
       `
+        width='35px'
         height='11px'
       }
       card.style.fontSize='1px'
       card.style.width=width
+      card.style.padding='1px'
       card.style.height=height
       card.style.pointerEvents='none'
-      card.style.background='url(images/card.png) no-repeat center center / 100% 100%'
+      card.style.background='url(images/roomCard.png) no-repeat center center / 100% 100%'
       this.roomCard = new CSS3DObject(card);
       this.roomCard.scale.set(0.05,0.05,0.05)
       this.roomCard.position.set(position.x,position.y+0.5,position.z);
       this.scene.add(this.roomCard);
       this.animateRoomCamer(position)
-      if (this.disposeRoomCardTimer) {
-        clearTimeout(this.disposeRoomCardTimer);
-      }
+      this.disposeCardTimer && clearTimeout(this.disposeCardTimer);
+      this.disposeRoomCardTimer && clearTimeout(this.disposeRoomCardTimer);
       this.disposeRoomCardTimer=setTimeout(()=>{
         this.disposeCard()
       },10000)
