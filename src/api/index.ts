@@ -1,6 +1,5 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 import router from "@/router";
-import { ElMessage } from 'element-plus';
 const baseUrl='http://localhost:4325'
 const axiosCancelTokens:any=[];//取消请求的token
 const $api = axios.create({
@@ -10,7 +9,6 @@ const $api = axios.create({
     'Content-Type':'application/json;charset=UTF-8'
   }
 });
-
 // 请求拦截器
 $api.interceptors.request.use(
   function(config){

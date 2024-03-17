@@ -1,22 +1,22 @@
 <template>
-  <Particles id="tsparticles" :particles-init="particlesInit" :options="obj" />
-  <div class="container" ref="container" id="container">
+  <Particles id="tsparticles" :options="obj" :particles-init="particlesInit" />
+  <div id="container" ref="container" class="container">
     <div class="login-box">
-      <div class="left"><img src="../assets/image/login.png" alt="" /></div>
-      <div class="right" :class="{'animate':isChanged}">
+      <div class="left"><img alt="" src="../assets/image/login.png" /></div>
+      <div :class="{ animate: isChanged }" class="right">
         <div class="title">教学楼信息可视化系统</div>
         <!--登录表单-->
-        <el-form ref="loginFormRef" v-show="showLogin" label-position="right" label-width="0px" :model="loginForm" style="max-width: 250px; margin-left: 10px">
-          <el-form-item>
+        <el-form v-show="showLogin" ref="loginFormRef" :model="loginForm" :rules="loginRules" label-position="right" label-width="0px" style="max-width: 250px; margin-left: 10px">
+          <el-form-item prop="username">
             <div class="label-name">用户名：</div>
             <el-input v-model="loginForm.username" />
           </el-form-item>
-          <el-form-item>
+          <el-form-item prop="password">
             <div class="label-name">密码：</div>
-            <el-input type="password" v-model="loginForm.password" />
+            <el-input v-model="loginForm.password" type="password" />
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" style="width: 100px; margin: 0 auto" @click="submitLogin">登录</el-button>
+            <el-button style="width: 100px; margin: 0 auto" type="primary" @click="submitLogin">登录</el-button>
           </el-form-item>
           <div class="btns">
             <div style="width: 100px" @click="changeForm(0)">注册</div>
@@ -25,29 +25,29 @@
         </el-form>
 
         <!--注册表单-->
-        <el-form ref="regFormRef" v-show="showRegister" label-position="left" label-width="0px" :model="registerForm" style="max-width: 250px; margin-left: 10px">
-          <el-form-item style="display: flex;justify-content: space-around">
+        <el-form v-show="showRegister" ref="regFormRef" :model="registerForm" :rules="regRules" label-position="left" label-width="0px" style="max-width: 250px; margin-left: 10px">
+          <el-form-item prop="username" style="display: flex; justify-content: space-around">
             <div class="label-name">用户名：</div>
-            <el-input style="width:150px" v-model="registerForm.username" />
+            <el-input v-model="registerForm.username" style="width: 150px" />
           </el-form-item>
-          <el-form-item>
+          <el-form-item prop="username">
             <div class="label-name">密码：</div>
-            <el-input style="width:150px" type="password" v-model="registerForm.password" />
+            <el-input v-model="registerForm.password" style="width: 150px" type="password" />
           </el-form-item>
-          <el-form-item>
+          <el-form-item prop="realname">
             <div class="label-name">真实姓名：</div>
-            <el-input style="width:150px" v-model="registerForm.realname" />
+            <el-input v-model="registerForm.realname" style="width: 150px" />
           </el-form-item>
-          <el-form-item>
+          <el-form-item prop="telphone">
             <div class="label-name">手机号：</div>
-            <el-input style="width:150px" v-model="registerForm.telphone" />
+            <el-input v-model="registerForm.telphone" style="width: 150px" />
           </el-form-item>
-          <el-form-item>
+          <el-form-item prop="cardnum">
             <div class="label-name">身份证号：</div>
-            <el-input style="width:150px" v-model="registerForm.cardnum" />
+            <el-input v-model="registerForm.cardnum" style="width: 150px" />
           </el-form-item>
           <el-form-item>
-            <el-button  type="primary" style="width: 100px; margin: 0 auto" @click="submitRegister">注册</el-button>
+            <el-button style="width: 100px; margin: 0 auto" type="primary" @click="submitRegister">注册</el-button>
           </el-form-item>
           <div class="btns">
             <div style="width: 100px" @click="changeForm(1)">登录</div>
@@ -56,21 +56,21 @@
         </el-form>
 
         <!--登录表单-->
-        <el-form ref="resetFormRef" v-show="showForget" label-position="right" label-width="0px" :model="loginForm" style="max-width: 250px; margin-left: 10px">
-          <el-form-item>
+        <el-form v-show="showForget" ref="resetFormRef" :model="forgetForm" :rules="resetRules" label-position="right" label-width="0px" style="max-width: 250px; margin-left: 10px">
+          <el-form-item prop="realname">
             <div class="label-name">真实姓名:</div>
             <el-input v-model="forgetForm.realname" />
           </el-form-item>
-          <el-form-item>
+          <el-form-item prop="cardnum">
             <div class="label-name">身份证号:</div>
             <el-input v-model="forgetForm.cardnum" />
           </el-form-item>
-          <el-form-item>
+          <el-form-item prop="newpassword">
             <div class="label-name">新密码:</div>
-            <el-input type="password" v-model="forgetForm.newpassword" />
+            <el-input v-model="forgetForm.newpassword" type="password" />
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" style="width: 100px; margin: 0 auto" @click="submitChangePwd">修改</el-button>
+            <el-button style="width: 100px; margin: 0 auto" type="primary" @click="submitChangePwd">修改</el-button>
           </el-form-item>
           <div class="btns">
             <div style="width: 100px" @click="changeForm(0)">注册</div>
@@ -81,40 +81,94 @@
     </div>
   </div>
 </template>
-<script setup lang="ts">
-import { onMounted, reactive, ref, inject } from "vue";
+<script lang="ts" setup>
+import { reactive, ref } from "vue";
 import { login, register, resetPassword } from "@/api/login.ts";
 import { useRouter } from "vue-router";
-import { ElMessage  } from "element-plus";
-import {useUserStore} from "@/store/userStore.ts";
+import { ElMessage } from "element-plus";
+import { useUserStore } from "@/store/userStore.ts";
 //@ts-ignore
 import obj from "@/assets/js/particles-options.js";
 //@ts-ignore
 import { loadSlim } from "tsparticles-slim";
+
 const router = useRouter();
 //背景粒子点
-const particlesInit = async (engine: any) => {await loadSlim(engine);};
-const isChanged=ref(false)
+const particlesInit = async (engine: any) => {
+  await loadSlim(engine);
+};
+const isChanged = ref(false);
 //表单ref
 /**
  * 表单相关
  */
+const loginFormRef = ref();
+const regFormRef = ref();
+const resetFormRef = ref();
 const loginForm = reactive({
-  username: "tianbin",
-  password: "123456",
+  username: "",
+  password: "",
 });
+const loginRules = {
+  username: [
+    { required: true, message: "请输入用户名", trigger: "blur" },
+    { min: 3, max: 8, message: "用户名长度为3到8个字符", trigger: "blur" },
+  ],
+  password: [
+    { required: true, message: "请输入密码", trigger: "blur" },
+    { min: 3, max: 12, message: "密码长度为3到12个字符", trigger: "blur" },
+  ]
+};
+
+const regRules={
+  username: [
+    { required: true, message: "请输入用户名", trigger: "blur" },
+    { min: 3, max: 8, message: "用户名长度为3到8个字符", trigger: "blur" },
+  ],
+  password: [
+    { required: true, message: "请输入密码", trigger: "blur" },
+    { min: 3, max: 12, message: "密码长度为3到12个字符", trigger: "blur" },
+  ],
+  cardnum: [
+    { required: true, message: "请输入身份证号", trigger: "blur" },
+    { min: 18, max: 18, message: "身份证号长度为18个字符", trigger: "blur" },
+  ],
+  telphone: [
+    { required: true, message: "请输入手机号", trigger: "blur" },
+    { min: 11, max: 11, message: "手机号长度为11个字符", trigger: "blur" },
+  ],
+  realname: [
+    { required: true, message: "请输入真实姓名", trigger: "blur" },
+    { min: 2, max: 8, message: "姓名长度为2到8个字符", trigger: "blur" },
+  ]
+}
+
+const resetRules={
+  cardnum: [
+    { required: true, message: "请输入身份证号", trigger: "blur" },
+    { min: 18, max: 18, message: "身份证号长度为18个字符", trigger: "blur" },
+  ],
+  realname: [
+    { required: true, message: "请输入真实姓名", trigger: "blur" },
+    { min: 2, max: 8, message: "姓名长度为2到8个字符", trigger: "blur" },
+  ],
+  newpassword: [
+    { required: true, message: "请输入新密码", trigger: "blur" },
+    { min: 3, max: 12, message: "密码长度为3到12个字符", trigger: "blur" },
+  ]
+}
 const forgetForm = reactive({
   realname: "",
   cardnum: "",
   newpassword: "",
 });
 const registerForm = reactive({
-  username: "xiaochen",
-  password: "123456",
-  realname:"小陈",
-  telphone:"12345678911",
-  cardnum:"422828200007112695",
-  permission:"1"
+  username: "",
+  password: "",
+  realname: "",
+  telphone: "",
+  cardnum: "",
+  permission: "1",
 });
 const showLogin = ref(true);
 const showRegister = ref(false);
@@ -127,14 +181,15 @@ const submitLogin = async () => {
       ElMessage.success("登录成功");
       localStorage.setItem("token", result.token);
       localStorage.setItem("userInfo", JSON.stringify(result.data));
-      const userStore=useUserStore()
-      userStore.setUser(result.data)
+      const userStore = useUserStore();
+      userStore.setUser(result.data);
       await router.push("/home");
     } else {
-      ElMessage.warning(result.message);
+      ElMessage.warning("用户名或密码错误");
     }
   } catch (error: any) {
-    ElMessage.warning('服务器出错了,请稍后再试');
+    console.log(error);
+    ElMessage.warning("服务器出错了,请稍后再试");
   }
 };
 
@@ -145,29 +200,29 @@ const submitRegister = async () => {
     console.log(result);
     if (result.code === 200) {
       ElMessage.success("注册成功");
-      changeForm(1)
+      changeForm(1);
     } else {
       ElMessage.warning(result.message);
     }
   } catch (error: any) {
-    ElMessage.warning('服务器出错了,请稍后再试');
+    ElMessage.warning("服务器出错了,请稍后再试");
   }
 };
 
 //找回密码
-const submitChangePwd=async()=>{
+const submitChangePwd = async () => {
   try {
     const result: any = await resetPassword(forgetForm);
     if (result.code === 200) {
       ElMessage.success("修改成功");
-      changeForm(1)
+      changeForm(1);
     } else {
       ElMessage.warning(result.message);
     }
   } catch (error: any) {
-    ElMessage.warning('服务器出错了,请稍后再试');
+    ElMessage.warning("服务器出错了,请稍后再试");
   }
-}
+};
 
 /**
  * 点击切换表单
@@ -175,10 +230,10 @@ const submitChangePwd=async()=>{
  * @param type
  */
 const changeForm = (type: number) => {
-  isChanged.value=true
-  setTimeout(()=>{
-    isChanged.value=false
-  },500)
+  isChanged.value = true;
+  setTimeout(() => {
+    isChanged.value = false;
+  }, 500);
   switch (type) {
     case 0:
       showLogin.value = false;
@@ -197,16 +252,16 @@ const changeForm = (type: number) => {
       break;
   }
 };
-
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .container {
   width: 100vw;
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+
   .login-box {
     width: 900px;
     height: 500px;
@@ -214,7 +269,7 @@ const changeForm = (type: number) => {
     border: 4px solid;
     border-radius: 20px;
 
-    border-image: linear-gradient(45deg, #faf7f7, #1984ef,#fff,#ccc) 1;
+    border-image: linear-gradient(45deg, #faf7f7, #1984ef, #fff, #ccc) 1;
     clip-path: inset(0px round 26px);
     animation: huerotate 6s infinite linear;
     filter: hue-rotate(360deg);
@@ -231,6 +286,7 @@ const changeForm = (type: number) => {
         filter: hue-rotate(360deg);
       }
     }
+
     .left {
       height: 100%;
       background-color: #535657;
@@ -240,6 +296,7 @@ const changeForm = (type: number) => {
       z-index: 999;
       overflow: hidden;
     }
+
     .right {
       flex: 1;
       height: 100%;
@@ -250,34 +307,38 @@ const changeForm = (type: number) => {
       justify-content: space-around;
       align-items: center;
       position: relative;
-      transition:all 1s ease;
+      transition: all 1s ease;
       opacity: 1;
 
       .label-name {
         font-size: 16px;
         font-weight: bold;
         color: #000;
-        width:100px;
+        width: 100px;
       }
+
       .title {
         width: 100%;
         text-align: center;
         font-size: 20px;
         font-weight: bold;
       }
+
       .btns {
         width: 100%;
         position: absolute;
         bottom: 0;
-        left:0;
+        left: 0;
         display: flex;
         justify-content: space-around;
-        margin-right:10px;
+        margin-right: 10px;
+
         div {
           border: 1px solid #ded8d8;
           box-shadow: 0 0 0 2px #ded8d8;
           text-align: center;
           border-radius: 5px;
+
           &:hover {
             border: 1px solid #21b5d2;
             box-shadow: 0 0 0 2px #21b5d2;
@@ -286,10 +347,10 @@ const changeForm = (type: number) => {
           }
         }
       }
-
     }
   }
 }
+
 #tsparticles {
   position: fixed;
   top: 0;
@@ -298,16 +359,18 @@ const changeForm = (type: number) => {
   height: 100vh;
   z-index: -5;
 }
-.animate{
+
+.animate {
   transform-origin: right top;
-  animation: animates ease .5s;
+  animation: animates ease 0.5s;
 }
+
 @keyframes animates {
-  0%{
+  0% {
     opacity: 0;
     transform: translateX(300px);
   }
-  100%{
+  100% {
     opacity: 1;
     transform: translateX(0px);
   }
