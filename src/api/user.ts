@@ -11,3 +11,7 @@ export const deleteUser=(id)=>{
 export const setRole=(id,permission)=>{
   return $api.post('/user/setRole',{id,permission})
 }
+
+export const getUserByText=(text)=>{
+  return $api.get('/user/getUserByText?text='+text)
+}

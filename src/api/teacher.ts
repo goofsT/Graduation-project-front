@@ -4,6 +4,10 @@ export const getAllTeacher = () => {
   return $api.get("/getAllTeacher");
 }
 
+export const getTeacherByText=(text)=>{
+  return $api.get('/getTeacherByText?text='+text)
+}
+
 export const deleteTeacher = (teacherId: number) => {
   return $api.post(`/deleteTeacher`, { teacherId });
 }

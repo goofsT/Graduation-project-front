@@ -1,5 +1,12 @@
 <template>
   <div class="container">
+    <el-input
+      v-model="searchValue"
+      placeholder="请输入查询内容"
+      style="width: 200px;margin-left:20px"
+      clearable
+      type="text"
+    />
     <el-table
       :data="userList"
       :header-cell-style="{background:'#105050',color:'#e5eeed',textAlign:'center',fontSize:'16px'}"
@@ -9,7 +16,7 @@
     >
       <el-table-column prop="id" label="用户id" width="100" />
       <el-table-column prop="username" label="用户名" width="110"  />
-      <el-table-column prop="password" label="密码" width="110"  />
+<!--      <el-table-column prop="password" label="密码" width="110"  />-->
       <el-table-column prop="realname" label="真实姓名" width="110"  />
       <el-table-column prop="telphone" label="电话"  width="150"/>
       <el-table-column prop="cardnum" label="身份证号" width="180"/>
@@ -25,6 +32,7 @@
           <el-button size="default" type="primary" @click="changePermission(scope.row,'1')">普通用户</el-button>
           <el-button size="default" type="primary" @click="changePermission(scope.row,'0')">管理员</el-button>
           <el-button size="default" type="primary" @click="changePermission(scope.row,'2')">维修人员</el-button>
+          <el-button size="default" type="primary" @click="resetPwd(scope.row)">重置密码</el-button>
           <el-button size="default" type="danger" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
@@ -34,12 +42,15 @@
 </template>
 
 <script setup lang="ts">
-import{ref,onMounted} from 'vue'
-import{getUserList,setRole,deleteUser} from "@/api/user.ts";
+import { ref, onMounted, watch } from "vue";
+import { getUserList, setRole, deleteUser, getUserByText } from "@/api/user.ts";
 import { ElMessage, ElMessageBox } from "element-plus";
+import { resetPassword } from "@/api/login.ts";
 const userList=ref([])
+const searchValue=ref('')
 onMounted(()=>{
   getData()
+  watchText()
 })
 
 /**
@@ -50,6 +61,27 @@ const getData=()=>{
   getUserList().then((res:any)=>{
     userList.value=res.data
   })
+}
+
+//监听搜索框的输入
+const watchText=()=>{
+  watch(searchValue,()=>{
+    getUserBySearchText()
+  })
+}
+
+//根据搜索框的输入查询用户
+const getUserBySearchText=async ()=>{
+  try{
+    const res=await getUserByText(searchValue.value)
+    if(res.code==200) {
+      userList.value = res.data
+    }else{
+      ElMessage.error('查询失败')
+    }
+  }catch (e) {
+    ElMessage.error('查询失败')
+  }
 }
 
 const changePermission=async (row,role)=>{
@@ -64,6 +96,25 @@ const changePermission=async (row,role)=>{
   }catch (e) {
     ElMessage.error('设置失败')
   }
+}
+
+const resetPwd=async (row)=>{
+  ElMessageBox.confirm(`是否重置用户${row.realname}的密码为123456?`, "警告", {
+    confirmButtonText: "重置",
+    cancelButtonText: "取消",
+    type: "警告",
+  }).then(async()=>{
+    try{
+      const res=await resetPassword({realname:row.realname,newpassword:'123456',cardnum:row.cardnum})
+      if(res.code==200){
+        ElMessage.success('重置密码成功')
+      }else{
+        ElMessage.error('重置密码失败')
+      }
+    }catch (e) {
+      ElMessage.error('重置密码失败')
+    }
+  })
 }
 
 /**

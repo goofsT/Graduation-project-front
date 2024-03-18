@@ -1,6 +1,13 @@
 <template>
   <div class="container">
     <el-button type="primary" @click="clickAddTeacher">添加教师</el-button>
+    <el-input
+      v-model="searchValue"
+      placeholder="请输入查询内容"
+      style="width: 200px;margin-left:20px"
+      clearable
+      type="text"
+    />
     <el-table
       :data="teacherList"
       :header-cell-style="{background:'#105050',color:'#e5eeed',textAlign:'center',fontSize:'16px'}"
@@ -50,11 +57,12 @@
 </template>
 
 <script setup lang="ts">
-import{ref,onMounted} from 'vue'
-import{getAllTeacher,updateTeacher,deleteTeacher,addTeacher} from "@/api/teacher.ts";
+import{ref,onMounted,watch} from 'vue'
+import { getAllTeacher, updateTeacher, deleteTeacher, addTeacher, getTeacherByText } from "@/api/teacher.ts";
 import { ElMessage, ElMessageBox } from "element-plus";
 const teacherList=ref([])
 const dialogFormVisible=ref(false)
+const searchValue=ref('')
 const dialogTitle=ref('')
 const form=ref({
   teacherId:'',
@@ -66,6 +74,7 @@ const form=ref({
 })
 onMounted(()=>{
   getData()
+  watchText()
 })
 
 
@@ -108,6 +117,26 @@ const submit=async ()=>{
     }catch (e) {
       ElMessage.error('添加失败')
     }
+  }
+}
+
+const watchText=()=>{
+  watch(searchValue,()=>{
+      getTeacherBySearchText()
+  })
+}
+
+const getTeacherBySearchText=async ()=>{
+  try{
+    const res=await getTeacherByText(searchValue.value)
+    if(res.code==200){
+      teacherList.value=res.data
+    }else{
+      ElMessage.error('获取数据失败')
+    }
+  }catch (e) {
+    console.log(e);
+    ElMessage.error('获取数据失败')
   }
 }
 
