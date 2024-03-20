@@ -86,6 +86,7 @@ const getRoomInfo=()=>{
 
 const getAffairInfo=()=>{
   getAffairNumInfo().then((res)=>{
+    console.log(res);
     if(res.code===200){
       data[2].num=res.data.todayNum+'今日'+'/'+res.data.weekNum+'本周'
       data[2].rateNum='今日占比'+((res.data.todayNum/res.data.weekNum)*100).toFixed(2)+'%'

@@ -12,23 +12,24 @@ const chartData = ref<any>(null)
 onMounted(() => {
   getData()
 })
-
 onBeforeUnmount(() => {
   window.removeEventListener('resize', () => {})
 })
-
-
 const getData = async () => {
-  const res = await getStudentNumToday()
-  if(res.code !== 200) return ElMessage.warning('获取人员数据失败')
-  chartData.value = res.data.filter(item=>{return item.buildingId === 1})
-  const date=[]
-  const num=[]
-  chartData.value.forEach(item=>{
-    num.push(item.num)
-    date.push(item.time.slice(11,16))
-  })
-  setChart(date,num)
+  try{
+    const res = await getStudentNumToday()
+    if(res.code !== 200) return ElMessage.warning('获取人员数据失败')
+    chartData.value = res.data.filter(item=>{return item.buildingId === 1})
+    const date=[]
+    const num=[]
+    chartData.value.forEach(item=>{
+      num.push(item.num)
+      date.push(item.time.slice(11,16))
+    })
+    setChart(date,num)
+  }catch (error) {
+    ElMessage.error('获取人员数据失败')
+  }
 }
 
 const setChart=(dateArr,numArr)=>{

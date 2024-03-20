@@ -10,7 +10,6 @@ import {DRACOLoader} from "three/addons/loaders/DRACOLoader";
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader";
 import {mergeGeometries} from "three/examples/jsm/utils/BufferGeometryUtils";
 import { CSS3DRenderer, CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
-import { PointLightHelper } from "three";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
@@ -117,7 +116,7 @@ export default {
         .load( [ 'px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg' ] );
       this.scene.background = skybox
       this.scene.environment = skybox
-      this.camera = new THREE.PerspectiveCamera(45,this.containerWidth/this.containerHeight,0.1,200)
+      this.camera = new THREE.PerspectiveCamera(45,this.containerWidth/this.containerHeight,0.001,200)
       this.camera.position.set(18,8,0)
       this.camera.lookAt(0,0,0)
       this.camera.aspect = this.containerWidth/this.containerHeight
@@ -400,7 +399,7 @@ export default {
     },
     animateRoomCamer(position){
       const p=Object.assign({},position)
-      p.z=p.z>0?1:-1
+      p.z=p.z>0?0.8:-0.8
       new TWEEN.Tween(this.camera.position)
         .to(p, 2000)
         .easing(TWEEN.Easing.Quadratic.Out)

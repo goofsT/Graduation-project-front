@@ -9,7 +9,10 @@
                <i class="iconfont icon-shiwu"></i>
                <span class="title" :style="{color:getDescriptionTextColor(affair.description)}">{{ affair.description }}</span>
              </div>
-             <div class="date">提交时间：{{ affair.affairTime }}</div>
+             <div style="display: flex;justify-content: space-between;width:100%;">
+               <div class="date">时间：{{ affair.affairTime }}</div>
+               <div class="date">提交:{{affair.user.realname}}</div>
+             </div>
            </div>
          <el-empty v-if="data.length==0" description="暂无今日事务" />
        </el-scrollbar>
@@ -33,7 +36,6 @@ const timer=ref(null)
 const title=ref('今日事务')
 //子组件数据
 const data = ref([])
-
 //控制显示隐藏
 const isShow = ref(true)
 watch(isShow,(newVal)=>{emit('updateShow',{name:props.name,isShow:newVal})})
@@ -76,15 +78,11 @@ const handleTodayAffairClick=async (affair)=>{
 const getData=()=>{
   getTodyAffairList().then((res)=>{
     if(res.code===200){
-      if(res.data.length>0){
         data.value=res.data.filter(item=>{
           return item.description.includes('维修')
         }).sort((a,b)=>{
           return new Date(b.affairTime).getTime()-new Date(a.affairTime).getTime()
         })
-      }else{
-        data.value=[]
-      }
     }else{
       ElMessage.warning('获取今日事务失败')
     }

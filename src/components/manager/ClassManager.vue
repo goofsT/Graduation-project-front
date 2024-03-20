@@ -1,13 +1,7 @@
 <template>
   <div class="container">
     <el-button type="primary" @click="clickAddclass">添加班级</el-button>
-    <el-table
-      :data="classList"
-      :header-cell-style="{background:'#105050',color:'#e5eeed',textAlign:'center',fontSize:'16px'}"
-      :cell-style="{background:'#2c2f31',color:'#93d8e5',textAlign:'center',height:'70px'}"
-      max-height="745"
-      style="width: 100%"
-    >
+    <el-table :data="classList" :header-cell-style="{background:'#105050',color:'#e5eeed',textAlign:'center',fontSize:'16px'}" :cell-style="{background:'#2c2f31',color:'#93d8e5',textAlign:'center',height:'70px'}" max-height="745" style="width: 100%">
       <el-table-column prop="classId" label="Id" width="100" />
       <el-table-column prop="className" label="姓名"  />
       <el-table-column prop="classNum" label="人数" width="100" />
