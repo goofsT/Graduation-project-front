@@ -116,9 +116,9 @@ export default {
         .load( [ 'px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg' ] );
       this.scene.background = skybox
       this.scene.environment = skybox
-      this.camera = new THREE.PerspectiveCamera(45,this.containerWidth/this.containerHeight,0.001,200)
+      this.camera = new THREE.PerspectiveCamera(45,this.containerWidth/this.containerHeight,0.01,200)
       this.camera.position.set(18,8,0)
-      this.camera.lookAt(0,0,0)
+      this.camera.lookAt(0,0,0)  
       this.camera.aspect = this.containerWidth/this.containerHeight
       this.camera.updateProjectionMatrix()
       this.scene.add(this.camera)
